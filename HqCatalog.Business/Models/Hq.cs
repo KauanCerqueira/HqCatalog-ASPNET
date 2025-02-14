@@ -15,5 +15,10 @@ namespace HqCatalog.Business.Models
         public int AnoPublicacao { get; set; }
         public string Genero { get; set; }
         public string ImagemUrl { get; set; }
+        public string Sinopse { get; set; }
+        public virtual Prateleira Prateleira { get; set; }
+        public int PrateleiraId { get; set; }
+        
+
     }
 }

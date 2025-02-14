@@ -1,0 +1,6 @@
+@Api.HqCatalog_HostAddress = http://localhost:5022
+
+GET {{Api.HqCatalog_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

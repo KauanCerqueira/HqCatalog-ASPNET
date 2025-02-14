@@ -1,0 +1,38 @@
+﻿@model IEnumerable<HqCatalog.Business.Models.Hq>
+<a asp-area="Catalogo" asp-controller="HQ" asp-action="Index">Catálogo de HQs</a>
+@{
+    ViewData["Title"] = "Lista de HQs";
+}
+
+<h2>Lista de HQs</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>Editora</th>
+            <th>Ano</th>
+            <th>Prateleira</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var hq in Model)
+        {
+            <tr>
+                <td>@hq.Titulo</td>
+                <td>@hq.Autor</td>
+                <td>@hq.Editora</td>
+                <td>@hq.AnoPublicacao</td>
+                <td>@hq.Prateleira?.Nome</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = hq.Id })">Editar</a> |
+                    <a href="@Url.Action("Delete", new { id = hq.Id })">Excluir</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create")" class="btn btn-primary">Adicionar HQ</a>
