@@ -14,6 +14,20 @@ namespace HqCatalog.Data.Context
         public DbSet<HQFavorita> HQsFavoritas { get; set; }
         public DbSet<Avaliacao> Avaliacoes { get; set; }
 
+        public bool TestarConexao()
+        {
+            try
+            {
+                return Database.CanConnect(); // Verifica se a conexão com o banco funciona
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro na conexão com o banco: {ex.Message}");
+                return false;
+            }
+        }
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

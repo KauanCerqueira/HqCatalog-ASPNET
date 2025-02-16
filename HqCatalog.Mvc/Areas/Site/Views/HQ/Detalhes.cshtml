@@ -1,0 +1,37 @@
+﻿@model HqCatalog.Business.Models.Hq
+
+@{
+    ViewData["Title"] = Model.Titulo;
+
+    // Define a cor do card com base na editora
+    string corEditora = Model.Editora.Contains("DC") ? "#0078D7" : (Model.Editora.Contains("Marvel") ? "#D72638" : "#333");
+}
+
+<div class="container mt-5">
+    <div class="row align-items-center">
+        <!-- Gaiola da HQ -->
+        <div class="col-md-6 d-flex justify-content-center">
+            <div class="hq-card">
+                <div class="hq-editora" style="background-color: @corEditora;">
+                    @Model.Editora
+                </div>
+                <img src="~/imagens/hqs/@Model.ImagemUrl" class="hq-image" alt="@Model.Titulo">
+            </div>
+        </div>
+
+        <!-- Informações da HQ -->
+        <div class="col-md-6 hq-info-container">
+            <h1 class="hq-title">@Model.Titulo</h1>
+            <p class="hq-details"><strong>Autor:</strong> @Model.Autor</p>
+            <p class="hq-details"><strong>Editora:</strong> @Model.Editora</p>
+            <p class="hq-details"><strong>Ano de Publicação:</strong> @Model.AnoPublicacao</p>
+            <p class="hq-details"><strong>Gênero:</strong> @Model.Genero</p>
+            <p class="hq-description">@Model.DescricaoCompleta</p>
+
+            <!-- Botão de Download -->
+            <a href="~/imagens/hqs/@Model.ImagemUrl" download="@($"{Model.Titulo.Replace(" ", "_")}.jpg")" class="hq-download-btn">
+                Baixar HQ
+            </a>
+        </div>
+    </div>
+</div>

@@ -1,50 +1,40 @@
-﻿using HqCatalog.Data.Context; // Importação correta do DbContext
-using Microsoft.AspNetCore.Identity;
+﻿using HqCatalog.Data.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔹 Configuração da Connection String
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// 🔹 Obtém a Connection String do appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// 🔹 Adiciona o DbContext e configura o banco de dados
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("A ConnectionString não foi encontrada no appsettings.json.");
+}
+
+// 🔹 Configura o DbContext para usar SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-// 🔹 Configuração do Identity (usuário padrão pode ser estendido futuramente)
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = true;
-})
-.AddEntityFrameworkStores<ApplicationDbContext>();
-
-// 🔹 Adiciona suporte a Razor Pages
-builder.Services.AddRazorPages();
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// 🔹 Configuração do pipeline de requisição
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-}
-else
-{
-    app.UseExceptionHandler("/Error");
-    app.UseHsts();
-}
+// 🔹 Ativa os arquivos estáticos (necessário para CSS, JS, imagens, etc.)
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
-app.UseAuthentication(); // 🔹 Adicionado para garantir autenticação
 app.UseAuthorization();
 
-app.MapStaticAssets();
-app.MapRazorPages().WithStaticAssets();
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{area=Site}/{controller=Home}/{action=Index}/{id?}");
+
+
 
 app.Run();

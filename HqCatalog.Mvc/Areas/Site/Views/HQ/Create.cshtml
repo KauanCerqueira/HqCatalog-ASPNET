@@ -1,0 +1,25 @@
+﻿@model HqCatalog.Business.Models.Hq
+
+<h2>Adicionar Nova HQ</h2>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <label>Título:</label>
+    <input type="text" name="Titulo" class="form-control" required>
+
+    <label>Autor:</label>
+    <input type="text" name="Autor" class="form-control" required>
+
+    <label>Editora:</label>
+    <input type="text" name="Editora" class="form-control" required>
+
+    <label>Ano de Publicação:</label>
+    <input type="number" name="AnoPublicacao" class="form-control" required>
+
+    <label>Gênero:</label>
+    <input type="text" name="Genero" class="form-control" required>
+
+    <label>Imagem da HQ:</label>
+    <input type="file" name="ImagemArquivo" class="form-control" required>
+
+    <button type="submit" class="btn btn-primary mt-3">Cadastrar HQ</button>
+</form>
