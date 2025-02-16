@@ -19,3 +19,20 @@
         });
     }
 });
+
+function excluirHq(hqId) {
+    if (confirm("Tem certeza que deseja excluir esta HQ?")) {
+        fetch(`/Site/Hq/Excluir/${hqId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Exibe a mensagem de sucesso ou erro
+                window.location.href = "/Site/Home/Index"; // Redireciona após excluir
+            })
+            .catch(error => console.error("Erro ao excluir a HQ:", error));
+    }
+}

@@ -2,9 +2,26 @@
 
 @{
     ViewData["Title"] = "Catálogo de HQs";
+
+    // Mapeamento dos personagens para os nomes das imagens corretas
+    var personagensMap = new Dictionary<string, string>
+    {
+        { "Batman", "imagens/Batman.png" },
+        { "Capitão América", "imagens/capitao-america.png" },
+        { "Dragon Ball", "imagens/dragon-ball.png" },
+        { "Justiceiro", "imagens/justiceiro.png" },
+        { "Lanterna Verde", "imagens/lanterna-verde.png" },
+        { "Superman", "imagens/superman.png" },
+        { "Homem-Aranha", "imagens/teia.png" }
+    };
 }
 
 <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Catálogo de HQs</h2>
+        <a href="@Url.Action("Create", "Hq", new { area = "Site" })" class="btn btn-success">+ Adicionar HQ</a>
+    </div>
+
     <div class="row">
         <!-- Sidebar de Filtros -->
         <div class="col-md-3">
@@ -16,6 +33,7 @@
                     @foreach (var editora in Model.Select(hq => hq.Editora).Distinct())
                     {
                         <label><input type="checkbox" class="filter-checkbox" data-filter="editora" value="@editora"> @editora</label>
+
                         <br>
                     }
                 </div>
@@ -24,6 +42,7 @@
                     @foreach (var genero in Model.Select(hq => hq.Genero).Distinct())
                     {
                         <label><input type="checkbox" class="filter-checkbox" data-filter="genero" value="@genero"> @genero</label>
+
                         <br>
                     }
                 </div>
@@ -35,55 +54,41 @@
             <div class="row" id="hq-list">
                 @foreach (var hq in Model)
                 {
-                    <div class="col-lg-4 col-md-6 col-sm-12 d-flex align-items-stretch hq-item" data-editora="@hq.Editora" data-genero="@hq.Genero">
-                        <div class="hq-card text-center shadow-sm hq-hover hq-@hq.Personagem.ToLower()"
-                             style="border: 2px solid @(hq.Editora == "DC Comics" ? "#1E88E5" : hq.Editora == "Marvel Comics" ? "#D32F2F" : "#333")">
+                    var editoraClass = hq.Editora.ToLower().Replace(" ", "-");
+                    var personagemImage = !string.IsNullOrEmpty(hq.Personagem) && personagensMap.ContainsKey(hq.Personagem)
+                    ? personagensMap[hq.Personagem]
+                    : null;
+                    var editoraCor = hq.Editora.ToLower().Contains("dc comics") ? "#1E88E5" :
+                    hq.Editora.ToLower().Contains("marvel comics") ? "#D32F2F" : "#333";
 
-                            <div class="hq-editora-bubble" style="background-color: @(hq.Editora == "DC Comics" ? "#1E88E5" : hq.Editora == "Marvel Comics" ? "#D32F2F" : "#333")">
-                                @hq.Editora
+                    <div class="col-lg-4 col-md-6 col-sm-12 d-flex align-items-stretch hq-item @editoraClass" id="hq-card-@hq.Id" data-editora="@hq.Editora" data-genero="@hq.Genero">
+                        <div class="hq-card text-center shadow-sm">
+                            <div class="hq-editora-bubble @editoraClass" style="background-color: @editoraCor">
+                                <span>@hq.Editora</span>
+                            </div>
+
+                            <!-- Ícone de Exclusão no Hover -->
+                            <div class="hq-delete-overlay" data-id="@hq.Id">
+                                <span class="hq-delete-icon">&times;</span>
                             </div>
 
                             <img src="~/imagens/hqs/@hq.ImagemUrl" class="hq-image" alt="@hq.Titulo">
 
-                            <!-- Efeitos de Personagem -->
-                            @if (hq.Personagem == "Batman")
-                            {
-                                <div class="effect-overlay">
-                                    <img src="~/imagens/morcego.png" class="effect-icon top-left">
-                                    <img src="~/imagens/morcego.png" class="effect-icon top-right">
-                                    <img src="~/imagens/morcego.png" class="effect-icon bottom-left">
-                                    <img src="~/imagens/morcego.png" class="effect-icon bottom-right">
-                                </div>
-                            }
-
-                            @if (hq.Personagem == "Homem-Aranha")
-                            {
-                                <div class="effect-overlay">
-                                    <img src="~/imagens/teia.png" class="effect-icon top-left">
-                                    <img src="~/imagens/teia.png" class="effect-icon top-right">
-                                    <img src="~/imagens/teia.png" class="effect-icon bottom-left">
-                                    <img src="~/imagens/teia.png" class="effect-icon bottom-right">
-                                </div>
-                            }
-
-                            @if (hq.Personagem == "Capitão América")
-                            {
-                                <div class="effect-overlay">
-                                    <img src="~/imagens/escudo.png" class="effect-icon top-left">
-                                    <img src="~/imagens/escudo.png" class="effect-icon top-right">
-                                    <img src="~/imagens/escudo.png" class="effect-icon bottom-left">
-                                    <img src="~/imagens/escudo.png" class="effect-icon bottom-right">
-                                </div>
-                            }
+                            <!-- Hover ativado para mostrar o tema do personagem -->
+                            <div class="effect-overlay">
+                                @if (!string.IsNullOrEmpty(personagemImage))
+                                {
+                                    <img src="~/@personagemImage" class="effect-icon top-left">
+                                    <img src="~/@personagemImage" class="effect-icon top-right">
+                                    <img src="~/@personagemImage" class="effect-icon bottom-left">
+                                    <img src="~/@personagemImage" class="effect-icon bottom-right">
+                                }
+                            </div>
 
                             <div class="hq-info">
                                 <h5 class="hq-title">@hq.Titulo</h5>
-                                <p class="hq-description">@hq.Sinopse</p> <!-- Sinopse corrigida -->
-                                <a href="@Url.Action("Detalhes", "Hq", new { id = hq.Id })"
-                                   class="hq-button"
-                                   style="background-color: @(hq.Editora == "DC Comics" ? "#1E88E5" :
-                                                            hq.Editora == "Marvel Comics" ? "#D32F2F" :
-                                                            hq.Editora == "Image Comics" ? "#444" : "#555")">
+                                <p class="hq-description">@hq.Sinopse</p>
+                                <a href="@Url.Action("Detalhes", "Hq", new { id = hq.Id })" class="hq-button" style="background-color: @editoraCor">
                                     Descubra Agora
                                 </a>
                             </div>

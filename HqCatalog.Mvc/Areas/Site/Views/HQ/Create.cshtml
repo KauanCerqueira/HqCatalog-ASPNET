@@ -1,25 +1,83 @@
 ﻿@model HqCatalog.Business.Models.Hq
 
-<h2>Adicionar Nova HQ</h2>
+@{
+    ViewData["Title"] = "Adicionar Nova HQ";
+}
 
-<form asp-action="Create" method="post" enctype="multipart/form-data">
-    <label>Título:</label>
-    <input type="text" name="Titulo" class="form-control" required>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Área da Imagem -->
+        <div class="col-md-6 d-flex flex-column align-items-center">
+            <div class="hq-card-details">
+                <div class="hq-editora-details" id="editoraLabel" style="background-color: #999;">
+                    EDITORA
+                </div>
+                <img id="previewImage" src="~/imagens/hqs/placeholder.jpg" class="hq-image-details" alt="Pré-visualização da HQ">
+                <input type="file" name="ImagemArquivo" id="ImagemArquivo" class="form-control mt-3" accept="image/*" required>
+            </div>
+        </div>
 
-    <label>Autor:</label>
-    <input type="text" name="Autor" class="form-control" required>
+        <!-- Formulário -->
+        <div class="col-md-6 hq-info-container">
+            <h1 class="hq-title">Adicionar Nova HQ</h1>
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                <label><strong>Título:</strong></label>
+                <input type="text" name="Titulo" class="form-control" required>
 
-    <label>Editora:</label>
-    <input type="text" name="Editora" class="form-control" required>
+                <label><strong>Autor:</strong></label>
+                <input type="text" name="Autor" class="form-control" required>
 
-    <label>Ano de Publicação:</label>
-    <input type="number" name="AnoPublicacao" class="form-control" required>
+                <label><strong>Editora:</strong></label>
+                <input list="editoras" name="Editora" class="form-control" placeholder="Digite ou selecione a editora" required>
 
-    <label>Gênero:</label>
-    <input type="text" name="Genero" class="form-control" required>
+                <datalist id="editoras">
+                    <option value="DC Comics">
+                    <option value="Marvel Comics">
+                    <option value="Panini">
+                    <option value="Image Comics">
+                    <option value="Shueisha">
+                </datalist>
 
-    <label>Imagem da HQ:</label>
-    <input type="file" name="ImagemArquivo" class="form-control" required>
 
-    <button type="submit" class="btn btn-primary mt-3">Cadastrar HQ</button>
-</form>
+                <label><strong>Ano de Publicação:</strong></label>
+                <input type="number" name="AnoPublicacao" class="form-control" required>
+
+                <label><strong>Gênero:</strong></label>
+                <input type="text" name="Genero" class="form-control" required>
+
+                <label><strong>Sinopse:</strong></label>
+                <textarea name="DescricaoCompleta" class="form-control" rows="3" required></textarea>
+
+                <button type="submit" class="hq-button mt-3">Cadastrar HQ</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script para Atualizar Pré-visualização da Imagem e Editora -->
+<script>
+    document.getElementById("ImagemArquivo").addEventListener("change", function (event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById("previewImage").src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById("editoraSelect").addEventListener("change", function () {
+        const editoraLabel = document.getElementById("editoraLabel");
+        const selectedEditora = this.value;
+
+        let corEditora = "#999"; // Cor padrão
+
+        if (selectedEditora.includes("DC")) corEditora = "#0078D7";
+        else if (selectedEditora.includes("Marvel")) corEditora = "#D72638";
+        else if (selectedEditora.includes("Panini")) corEditora = "#333";
+
+        editoraLabel.style.backgroundColor = corEditora;
+        editoraLabel.textContent = selectedEditora.toUpperCase();
+    });
+</script>

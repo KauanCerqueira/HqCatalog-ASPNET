@@ -1,0 +1,114 @@
+﻿/* 🌟 Estilização da Página de Detalhes */
+.hq-details-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 30px;
+}
+
+/* 🌟 Imagem da HQ */
+.hq-card-details {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* 🌟 Imagem da HQ */
+.hq-image-details {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* 🌟 Nome da Editora no topo */
+.hq-editora-details {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* 🌟 Botões de Ação */
+.hq-buttons-grid {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* 🌟 Botão de Download */
+.hq-download-btn {
+    background-color: #0078D7;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+    .hq-download-btn:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+
+/* 🌟 Botão de Apagar */
+.hq-delete-btn {
+    background-color: #D72638;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+    .hq-delete-btn:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+
+/* 🌟 Modal de Confirmação */
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-header {
+    background-color: #D72638;
+    color: white;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.modal-footer .btn-danger {
+    background-color: #D72638;
+    border: none;
+}
+
+    .modal-footer .btn-danger:hover {
+        background-color: #A31E2E;
+    }
+
+/* 🌟 Responsividade */
+@media (max-width: 991px) {
+    .hq-details-container {
+        flex-direction: column;
+    }
+}

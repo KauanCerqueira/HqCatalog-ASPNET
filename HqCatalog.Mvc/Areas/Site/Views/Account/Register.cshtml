@@ -2,16 +2,59 @@
     ViewData["Title"] = "Cadastro";
 }
 
-<h2>Cadastro</h2>
-<form>
-    <label>Nome:</label>
-    <input type="text" class="form-control" required>
+<link rel="stylesheet" href="~/css/auth.css">
 
-    <label>Email:</label>
-    <input type="email" class="form-control" required>
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 class="text-center">Cadastro</h2>
 
-    <label>Senha:</label>
-    <input type="password" class="form-control" required>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger text-center">@TempData["Error"]</div>
+        }
 
-    <button type="submit" class="hq-button">Cadastrar</button>
-</form>
+        <form asp-area="Site" asp-controller="Account" asp-action="Register" method="post">
+            <div class="mb-3">
+                <label for="nome" class="form-label">Nome</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-user"></i></span>
+                    <input type="text" class="form-control" id="nome" name="nome" placeholder="Digite seu nome" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Digite seu email" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Digite sua senha" required>
+                </div>
+                <small class="text-muted">A senha deve conter no mínimo 6 caracteres, incluindo uma letra maiúscula e um número.</small>
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmPassword" class="form-label">Confirme a Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="Confirme sua senha" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+        </form>
+
+            <div class="text-center mt-3">
+                <a href="@Url.Action("Login", "Account", new { area = "Site" })">Já tem uma conta? Entrar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="~/js/auth.js"></script>

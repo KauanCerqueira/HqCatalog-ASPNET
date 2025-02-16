@@ -1,4 +1,126 @@
-﻿/* 🌟 Estilização dos efeitos */
+﻿/* 🌟 Layout Principal */
+#hq-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.hq-item {
+    flex: 0 0 calc(33.33% - 20px);
+    max-width: calc(33.33% - 20px);
+    display: flex;
+    align-items: stretch;
+}
+
+/* 🌟 Grid invisível para organizar os botões lado a lado */
+.hq-buttons-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 🔹 Cada botão ocupa metade da linha */
+    gap: 15px; /* 🔹 Espaçamento uniforme entre os botões */
+    justify-content: center; /* 🔹 Centraliza os botões */
+    align-items: center; /* 🔹 Alinhamento na vertical */
+    width: max-content; /* 🔹 Mantém o grid compacto ao redor dos botões */
+    margin-top: 20px;
+}
+
+/* 🌟 Garante que ambos os botões tenham o mesmo tamanho */
+.hq-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    white-space: nowrap; /* 🔹 Evita que o texto quebre */
+    height: 45px; /* 🔹 Altura uniforme */
+    width: 100%; /* 🔹 Ocupa toda a largura disponível na grid */
+}
+
+/* 🌟 Ajuste específico para descer o botão de Apagar HQ */
+.hq-delete-btn {
+    background-color: #D72638; /* 🔹 Vermelho */
+    color: white;
+    border: none;
+    margin-top: 15px; /* 🔹 Ajuste fino para alinhar com o botão de baixar */
+}
+
+/* 🌟 Botão de Baixar HQ */
+.hq-download-btn {
+    background-color: #0078D7; /* 🔹 Azul */
+    color: white;
+    border: none;
+}
+
+    /* 🔹 Efeito ao passar o mouse */
+    .hq-download-btn:hover,
+    .hq-delete-btn:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+
+
+/* 🌟 Imagem fixa grande da HQ */
+.hq-card-details {
+    position: relative;
+    width: 100%;
+    max-width: 450px; /* 🔹 Define um tamanho grande */
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* 🌟 Imagem da HQ na página de detalhes */
+.hq-image-details {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* 🌟 Nome da Editora no topo */
+.hq-editora-details {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: rgba(0, 0, 0, 0.9);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* 🌟 Botão de Download estilizado */
+.hq-download-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-top: 20px;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+    .hq-download-btn:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+
+
+/* 🌟 Ajuste dos Cards das HQs - Tamanho Fixo */
 .hq-card {
     position: relative;
     background: white;
@@ -6,13 +128,200 @@
     padding: 15px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     text-align: center;
-    transition: transform 0.2s;
+    transition: transform 0.3s ease-in-out;
     width: 100%;
-    height: 500px;
+    height: 550px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
 }
+
+    /* 🌟 Efeito Hover - Destaque ao passar o mouse */
+    .hq-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+/* 🌟 Ajuste das Imagens das HQs - Tamanho Fixo */
+.hq-image {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 5px;
+    margin-bottom: 1px; /* 🔹 Reduzido para aproximar do título */
+}
+
+@model List<HqCatalog.Business.Models.Hq> @ {
+    ViewData ["Title"] = "Catálogo de HQs";
+
+    // Mapeamento dos personagens para os nomes das imagens corretas
+    var personagensMap = new Dictionary<string, string > {
+
+{
+    "Batman", "imagens/Batman.png"
+}
+
+,
+{
+    "Capitão América", "imagens/capitao-america.png"
+}
+
+,
+{
+    "Dragon Ball", "imagens/dragon-ball.png"
+}
+
+,
+{
+    "Justiceiro", "imagens/justiceiro.png"
+}
+
+,
+{
+    "Lanterna Verde", "imagens/lanterna-verde.png"
+}
+
+,
+{
+    "Superman", "imagens/superman.png"
+}
+
+,
+{
+    "Homem-Aranha", "imagens/teia.png"
+}
+
+}
+;
+}
+
+<div class="container mt-4" >
+<div class="row" >
+<!-- Sidebar de Filtros -->
+<div class="col-md-3" >
+<div class="filter-sidebar" >
+<h4 > <strong > Filtros</strong > </h4 >
+<hr >
+<h5 > Editora</h5 >
+<div id="editora-filtros" >
+@foreach (var editora in Model.Select(hq => hq.Editora).Distinct()) {
+    <label><input type="checkbox" class="filter-checkbox" data-filter="editora" value="@editora"> @editora</label> <br>
+}
+
+</div >
+<h5 > Gênero</h5 >
+<div id="genero-filtros" >
+@foreach (var genero in Model.Select(hq => hq.Genero).Distinct()) {
+    <label><input type="checkbox" class="filter-checkbox" data-filter="genero" value="@genero"> @genero</label> <br>
+}
+
+</div >
+</div >
+</div >
+<!-- Lista de HQs -->
+<div class="col-md-9" >
+<div class="row" id="hq-list" >
+@foreach (var hq in Model) {
+    var editoraClass = hq.Editora.ToLower().Replace(" ", "-");
+    var personagemImage = !string.IsNullOrEmpty(hq.Personagem) && personagensMap.ContainsKey(hq.Personagem) ? personagensMap[hq.Personagem] : null;
+    var isDcOrMarvel = hq.Editora.ToLower().Contains("dc comics") || hq.Editora.ToLower().Contains("marvel comics");
+    var editoraColor = isDcOrMarvel ? "" : "#000";
+    <div class="col-lg-4 col-md-6 col-sm-12 d-flex align-items-stretch hq-item @editoraClass" data-editora="@hq.Editora" data-genero="@hq.Genero"> <div class="hq-card text-center shadow-sm"> <div class="hq-editora-bubble @editoraClass" style="background-color: @(string.IsNullOrEmpty(editoraClass) ? editoraColor : "")"> <span>@hq.Editora</span> </div> <img src="~/imagens/hqs/@hq.ImagemUrl" class="hq-image" alt="@hq.Titulo">
+    <!-- Hover ativado para todas as HQs -->
+    <div class="effect-overlay"> @if (!string.IsNullOrEmpty(personagemImage))
+
+{
+    <img src="~/@personagemImage" class="effect-icon top-left"> <img src="~/@personagemImage" class="effect-icon top-right"> <img src="~/@personagemImage" class="effect-icon bottom-left"> <img src="~/@personagemImage" class="effect-icon bottom-right">
+}
+
+</div >
+
+<div class="hq-info" >
+<h5 class="hq-title" > @hq.Titulo</h5 >
+<p class="hq-description" > @hq.Sinopse</p >
+<a href="@Url.Action("Detalhes", "Hq", new { id = hq.Id })" class="hq-button" >
+Descubra Agora
+</a >
+</div >
+</div >
+</div >
+}
+
+</div >
+</div >
+</div >
+</div >
+
+<style >
+/* 🌟 Layout Principal */
+#hq-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* 🔹 Distribui os itens corretamente */
+    gap: 20px; /* 🔹 Mantém um espaçamento uniforme */
+    align-items: stretch; /* 🔹 Garante que os itens tenham altura flexível */
+}
+
+.hq-item {
+    flex: 0 0 calc(33.33% - 20px); /* 🔹 Garante 3 HQs por linha */
+    max-width: calc(33.33% - 20px);
+    display: flex;
+    align-items: flex-start; /* 🔹 Permite a adaptação automática */
+}
+
+
+/* 🌟 Ajuste dos Cards das HQs - Tamanho Fixo */
+.hq-card {
+    position: relative;
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    transition: transform 0.3s ease-in-out;
+    width: 100%;
+    height: 550px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hq-editora-bubble {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; /* 🔹 Faz o balão preencher toda a largura do card */
+    height: 40px; /* 🔹 Define uma altura fixa para o balão */
+    display: flex;
+    align-items: center; /* 🔹 Centraliza verticalmente o texto */
+    justify-content: center; /* 🔹 Centraliza horizontalmente o texto */
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: rgba(0, 0, 0, 0.9); /* 🔹 Mantém o fundo escuro */
+    border-top-left-radius: 8px; /* 🔹 Mantém o estilo arredondado */
+    border-top-right-radius: 8px;
+}
+
+    /* 🌟 Se a editora não for DC ou Marvel, define cor preta */
+    .hq-editora-bubble[style*='background-color: #000'] {
+        background-color: black !important;
+    }
+/* 🌟 Aplicando a cor correta da editora */
+.dc-comics .hq-button, .dc-comics .hq-editora-bubble {
+    background-color: #1E88E5;
+}
+
+.marvel-comics .hq-button, .marvel-comics .hq-editora-bubble {
+    background-color: #D32F2F;
+}
+
+/* 🌟 Botão de Detalhes */
 .hq-button {
     display: inline-block;
     padding: 10px 15px;
@@ -22,22 +331,15 @@
     font-size: 14px;
     font-weight: bold;
     text-align: center;
-    width: 100%; /* 🔹 Faz o botão ocupar a largura da div */
+    width: 100%;
     border: none;
 }
 
-    /* Efeito ao passar o mouse */
     .hq-button:hover {
-        filter: brightness(85%);
+        filter: brightness(100%);
     }
 
-
-    .hq-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-/* 🌟 Ícones de efeitos (exemplo: morcegos e teias) */
+/* 🌟 Efeito de Hover nos Ícones dos Personagens */
 .effect-overlay {
     position: absolute;
     top: 0;
@@ -53,70 +355,40 @@
 }
 
 .effect-icon {
-    width: 40px !important;
-    height: auto !important;
+    width: 40px;
+    height: auto;
     position: absolute;
     opacity: 0.8;
 }
 
-/* Posicionamento dos ícones */
+/* 🌟 Posicionamento dos ícones nos quatro cantos */
 .top-left {
-    top: 10px;
-    left: 10px;
+    top: 5px;
+    left: 5px;
     transform: rotate(-20deg);
 }
 
 .top-right {
-    top: 10px;
-    right: 10px;
+    top: 5px;
+    right: 5px;
     transform: rotate(20deg);
 }
 
 .bottom-left {
-    bottom: 10px;
-    left: 10px;
+    bottom: 5px;
+    left: 5px;
     transform: rotate(-30deg);
 }
 
 .bottom-right {
-    bottom: 10px;
-    right: 10px;
+    bottom: 5px;
+    right: 5px;
     transform: rotate(30deg);
 }
 
-/* Exibir os ícones ao passar o mouse */
+/* 🌟 Exibir os ícones ao passar o mouse */
 .hq-card:hover .effect-overlay {
     opacity: 1;
-}
-
-/* 🌟 Balão da Editora */
-.hq-editora-bubble {
-    position: absolute;
-    top: -15px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 5px 12px;
-    border-radius: 20px;
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-    white-space: nowrap;
-    border: 2px solid black;
-}
-
-/* 🌟 Layout das HQs */
-#hq-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 20px;
-}
-
-.hq-item {
-    flex: 0 0 32%;
-    max-width: 32%;
-    display: flex;
 }
 
 /* 🌟 Responsividade */

@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HqCatalog.Business.Models;
-
-namespace HqCatalog.Business.Models
+﻿namespace HqCatalog.Business.Models
 {
     public class HQFavorita
     {
-        public int Id { get; set; }
-        public int UsuarioId { get; set; }
-        public int HQId { get; set; }
-        public virtual User Usuario { get; set; }
+        public string UsuarioId { get; set; } // ID do usuário no Identity
+        public int HQId { get; set; } // 🔹 Chave estrangeira para HQ
+
+        // 🔹 Relacionamento com HQ
         public virtual Hq HQ { get; set; }
     }
 }

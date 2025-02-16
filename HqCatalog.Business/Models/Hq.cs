@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HqCatalog.Business.Models
 {
@@ -18,9 +15,15 @@ namespace HqCatalog.Business.Models
         public string Genero { get; set; }
         public string ImagemUrl { get; set; }
         public string Sinopse { get; set; }
-        public virtual Prateleira Prateleira { get; set; }
-        public int PrateleiraId { get; set; }
-        
 
+        // 🔹 Relacionamentos com outras entidades
+        public virtual ICollection<Avaliacao> Avaliacoes { get; set; }
+        public virtual ICollection<HQFavorita> HQsFavoritas { get; set; }
+
+        public Hq()
+        {
+            Avaliacoes = new List<Avaliacao>();
+            HQsFavoritas = new List<HQFavorita>();
+        }
     }
 }

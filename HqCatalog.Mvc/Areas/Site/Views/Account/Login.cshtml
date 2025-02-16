@@ -1,39 +1,45 @@
 ﻿@{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Entrar";
 }
 
-<h2>Login</h2>
-<form>
-    <label>Email:</label>
-    <input type="email" class="form-control" required>
+<link rel="stylesheet" href="~/css/auth.css">
 
-    <label>Senha:</label>
-    <input type="password" class="form-control" required>
+<div class="auth-container">
+    <div class="auth-card @(TempData["Error"] != null ? "error" : "")">
+        <h2 class="text-center">Entrar</h2>
 
-    <button type="submit" class="hq-button">Entrar</button>
-</form>
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger text-center">@TempData["Error"]</div>
+        }
 
-<style>
-    form {
-        max-width: 400px;
-        margin: 20px auto;
-        background: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
+        <form asp-area="Site" asp-controller="Account" asp-action="Login" method="post">
+            <div class="mb-3">
+                <label>Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                    <input type="email" name="email" class="form-control @(TempData["Error"] != null ? "is-invalid" : "")" required placeholder="Digite seu email">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control @(TempData["Error"] != null ? "is-invalid" : "")" required placeholder="Digite sua senha">
+                </div>
+            </div>
+            <div class="mb-3">
+                <input type="checkbox" name="rememberMe"> Lembrar-me
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Entrar</button>
 
-    label {
-        font-weight: bold;
-        display: block;
-        margin-top: 10px;
-    }
+            <div class="text-center mt-3">
+                <a href="#">Esqueceu sua senha?</a>
+            </div>
 
-    .form-control {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
-</style>
+            <div class="text-center mt-2">
+                <a href="@Url.Action("Register", "Account", new { area = "Site" })">Não tem uma conta? Cadastre-se</a>
+            </div>
+        </form>
+    </div>
+</div>

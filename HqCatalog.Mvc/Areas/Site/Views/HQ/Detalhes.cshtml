@@ -3,19 +3,20 @@
 @{
     ViewData["Title"] = Model.Titulo;
 
-    // Define a cor do card com base na editora
-    string corEditora = Model.Editora.Contains("DC") ? "#0078D7" : (Model.Editora.Contains("Marvel") ? "#D72638" : "#333");
+    // Define a cor com base na editora
+    string corEditora = Model.Editora.Contains("DC") ? "#0078D7" :
+                        (Model.Editora.Contains("Marvel") ? "#D72638" : "#333");
 }
 
 <div class="container mt-5">
-    <div class="row align-items-center">
-        <!-- Gaiola da HQ -->
+    <div class="row hq-details-container">
+        <!-- Imagem da HQ -->
         <div class="col-md-6 d-flex justify-content-center">
-            <div class="hq-card">
-                <div class="hq-editora" style="background-color: @corEditora;">
+            <div class="hq-card-details">
+                <div class="hq-editora-details" style="background-color: @corEditora;">
                     @Model.Editora
                 </div>
-                <img src="~/imagens/hqs/@Model.ImagemUrl" class="hq-image" alt="@Model.Titulo">
+                <img src="~/imagens/hqs/@Model.ImagemUrl" class="hq-image-details" alt="@Model.Titulo">
             </div>
         </div>
 
@@ -28,10 +29,41 @@
             <p class="hq-details"><strong>Gênero:</strong> @Model.Genero</p>
             <p class="hq-description">@Model.DescricaoCompleta</p>
 
-            <!-- Botão de Download -->
-            <a href="~/imagens/hqs/@Model.ImagemUrl" download="@($"{Model.Titulo.Replace(" ", "_")}.jpg")" class="hq-download-btn">
-                Baixar HQ
-            </a>
+            <!-- Botões -->
+            <div class="hq-buttons-grid">
+                <!-- Botão de Baixar -->
+                <a href="~/imagens/hqs/@Model.ImagemUrl" download="@($"{Model.Titulo.Replace(" ", "_")}.jpg")"
+                   class="hq-button hq-download-btn">
+                    Baixar HQ
+                </a>
+
+                <!-- Botão de Apagar -->
+                <button type="button" class="hq-button hq-delete-btn" onclick="confirmarExclusao(@Model.Id)">
+                    Apagar HQ
+                </button>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Script para Exclusão -->
+<script>
+    function confirmarExclusao(hqId) {
+        if (confirm("Tem certeza que deseja excluir esta HQ?")) {
+            fetch(`/Site/Hq/Excluir`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({ id: hqId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message); // Exibe alerta de sucesso
+                window.location.href = "/Site/Home/Index"; // Redireciona para Index
+            })
+            .catch(error => console.error("Erro ao excluir a HQ:", error));
+        }
+    }
+</script>

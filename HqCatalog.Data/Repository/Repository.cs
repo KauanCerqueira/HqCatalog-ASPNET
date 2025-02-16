@@ -19,17 +19,13 @@ namespace HqCatalog.Data.Repository
         // 🔹 Obtém todas as HQs incluindo a prateleira relacionada
         public async Task<List<Hq>> ObterTodos()
         {
-            return await _context.HQs
-                .Include(h => h.Prateleira) // Para carregar os dados da Prateleira junto
-                .ToListAsync();
+            return await _context.HQs.ToListAsync();
         }
 
         // 🔹 Obtém uma HQ específica pelo ID, incluindo a prateleira
         public async Task<Hq> ObterPorId(int id)
         {
-            return await _context.HQs
-                .Include(h => h.Prateleira)
-                .FirstOrDefaultAsync(h => h.Id == id); // Evita erro ao buscar
+            return await _context.HQs.FirstOrDefaultAsync(h => h.Id == id);
         }
 
         // 🔹 Adiciona uma nova HQ ao banco de dados
