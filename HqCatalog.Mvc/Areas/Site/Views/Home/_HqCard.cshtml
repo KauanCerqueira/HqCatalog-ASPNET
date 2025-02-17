@@ -1,0 +1,24 @@
+﻿@model HqCatalog.Business.Models.Hq
+
+@{
+    var editoraCor = Model.Editora.ToLower().Contains("dc comics") ? "#1E88E5" :
+                     Model.Editora.ToLower().Contains("marvel comics") ? "#D32F2F" : "#333";
+}
+
+<div class="col-lg-4 col-md-6 col-sm-12 d-flex align-items-stretch hq-item">
+    <div class="hq-card text-center shadow-sm">
+        <div class="hq-editora-bubble" style="background-color: @editoraCor">
+            <span>@Model.Editora</span>
+        </div>
+
+        <img src="~/imagens/hqs/@Model.ImagemUrl" class="hq-image" alt="@Model.Titulo">
+
+        <div class="hq-info">
+            <h5 class="hq-title">@Model.Titulo</h5>
+            <p class="hq-description">@Model.Sinopse</p>
+            <a href="@Url.Action("Detalhes", "Hq", new { id = Model.Id })" class="hq-button" style="background-color: @editoraCor">
+                Descubra Agora
+            </a>
+        </div>
+    </div>
+</div>

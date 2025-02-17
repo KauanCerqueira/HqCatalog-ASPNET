@@ -2,10 +2,10 @@
 using HqCatalog.Business.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Authentication;
+using System;
 
 namespace HqCatalog.Mvc.Areas.Site.Controllers
 {
@@ -29,9 +29,10 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, bool rememberMe)
         {
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
                 TempData["Error"] = "Preencha todos os campos!";
                 return View();
@@ -60,37 +61,51 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(string nome, string email, string password, string confirmPassword)
         {
-            if (string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+            try
             {
-                TempData["Error"] = "Preencha todos os campos!";
-                return View();
+                if (string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(email) ||
+                    string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(confirmPassword))
+                {
+                    return Json(new { success = false, error = "Preencha todos os campos!" });
+                }
+
+                if (password != confirmPassword)
+                {
+                    return Json(new { success = false, error = "As senhas não coincidem!" });
+                }
+
+                var user = new ApplicationUser
+                {
+                    Nome = nome,
+                    UserName = email,
+                    Email = email,
+                    DataCadastro = DateTime.UtcNow,
+                    Ativo = true,
+                    Tipo = UserRole.Usuario // Define o tipo de usuário padrão
+                };
+
+                var result = await _userManager.CreateAsync(user, password);
+                if (result.Succeeded)
+                {
+                    // 🔹 Loga o usuário automaticamente após registro
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    _logger.LogInformation("✅ Usuário registrado e logado: {Email}", email);
+                    return Json(new { success = true });
+                }
+
+                var errorMessage = result.Errors.FirstOrDefault()?.Description ?? "Erro desconhecido ao registrar usuário.";
+                _logger.LogError("❌ Erro ao registrar usuário {Email}: {Erro}", email, errorMessage);
+                return Json(new { success = false, error = errorMessage });
             }
-
-            if (password != confirmPassword)
+            catch (Exception ex)
             {
-                TempData["Error"] = "As senhas não coincidem!";
-                return View();
+                _logger.LogError("❌ Erro inesperado ao registrar usuário: {Mensagem}", ex.Message);
+                return Json(new { success = false, error = "Erro interno no servidor. Tente novamente mais tarde." });
             }
-
-            var user = new ApplicationUser
-            {
-                Nome = nome,
-                UserName = email,
-                Email = email
-            };
-
-            var result = await _userManager.CreateAsync(user, password);
-            if (result.Succeeded)
-            {
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("Index", "Home", new { area = "Site" });
-            }
-
-            TempData["Error"] = result.Errors.FirstOrDefault()?.Description ?? "Erro ao registrar usuário.";
-            return View();
         }
 
         [Authorize]
@@ -107,12 +122,13 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
 
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(ApplicationUser model)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
+            if (user == null || user.Id != model.Id)
             {
-                return RedirectToAction("Login");
+                return Unauthorized();
             }
 
             user.Nome = model.Nome;
@@ -131,24 +147,19 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken] // 🔹 Mantém a segurança contra CSRF
         public async Task<IActionResult> Logout()
         {
-            _logger.LogInformation("Usuário solicitou logout...");
+            _logger.LogInformation("🔹 Logout chamado via POST!");
 
-            // 🔹 Desloga o usuário do Identity
             await _signInManager.SignOutAsync();
             await HttpContext.SignOutAsync(IdentityConstants.ApplicationScheme);
 
-            // 🔹 Remove manualmente os cookies de autenticação
             HttpContext.Response.Cookies.Delete(".AspNetCore.Identity.Application");
-            HttpContext.Response.Cookies.Delete("Identity.External");
-
-            // 🔹 Limpa qualquer informação do usuário na sessão
             HttpContext.Session.Clear();
             HttpContext.User = new System.Security.Claims.ClaimsPrincipal();
 
-            _logger.LogInformation("Usuário deslogado com sucesso!");
+            _logger.LogInformation("✅ Logout finalizado com sucesso!");
 
             return RedirectToAction("Login", "Account", new { area = "Site" });
         }

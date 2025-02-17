@@ -38,6 +38,17 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        const logoutForm = document.getElementById("logoutForm");
+
+        if (logoutForm) {
+            logoutForm.addEventListener("submit", function () {
+                console.log("Logout acionado! Enviando requisição ao servidor...");
+            });
+        }
+    });
+
+
+    document.addEventListener("DOMContentLoaded", function () {
         const logoutButton = document.querySelector("#logoutForm button");
         if (logoutButton) {
             logoutButton.addEventListener("click", function (event) {

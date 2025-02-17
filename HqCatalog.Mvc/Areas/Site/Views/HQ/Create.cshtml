@@ -6,29 +6,30 @@
 
 <div class="container mt-5">
     <div class="row">
-        <!-- Área da Imagem -->
         <div class="col-md-6 d-flex flex-column align-items-center">
             <div class="hq-card-details">
                 <div class="hq-editora-details" id="editoraLabel" style="background-color: #999;">
                     EDITORA
                 </div>
                 <img id="previewImage" src="~/imagens/hqs/placeholder.jpg" class="hq-image-details" alt="Pré-visualização da HQ">
-                <input type="file" name="ImagemArquivo" id="ImagemArquivo" class="form-control mt-3" accept="image/*" required>
+                <input type="file" asp-for="ImagemArquivo" id="ImagemArquivo" class="form-control mt-3" accept="image/*">
             </div>
         </div>
 
-        <!-- Formulário -->
         <div class="col-md-6 hq-info-container">
             <h1 class="hq-title">Adicionar Nova HQ</h1>
-            <form asp-action="Create" method="post" enctype="multipart/form-data">
+
+            <form id="formCadastro" asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
                 <label><strong>Título:</strong></label>
-                <input type="text" name="Titulo" class="form-control" required>
+                <input asp-for="Titulo" class="form-control" required>
 
                 <label><strong>Autor:</strong></label>
-                <input type="text" name="Autor" class="form-control" required>
+                <input asp-for="Autor" class="form-control" required>
 
                 <label><strong>Editora:</strong></label>
-                <input list="editoras" name="Editora" class="form-control" placeholder="Digite ou selecione a editora" required>
+                <input list="editoras" asp-for="Editora" class="form-control" required>
 
                 <datalist id="editoras">
                     <option value="DC Comics">
@@ -38,46 +39,49 @@
                     <option value="Shueisha">
                 </datalist>
 
-
                 <label><strong>Ano de Publicação:</strong></label>
-                <input type="number" name="AnoPublicacao" class="form-control" required>
+                <input asp-for="AnoPublicacao" type="number" class="form-control" required>
 
                 <label><strong>Gênero:</strong></label>
-                <input type="text" name="Genero" class="form-control" required>
+                <input asp-for="Genero" class="form-control" required>
+
+                <label><strong>Personagem:</strong></label>
+                <input asp-for="Personagem" class="form-control" required>
 
                 <label><strong>Sinopse:</strong></label>
-                <textarea name="DescricaoCompleta" class="form-control" rows="3" required></textarea>
+                <textarea asp-for="DescricaoCompleta" class="form-control" rows="3" required></textarea>
 
-                <button type="submit" class="hq-button mt-3">Cadastrar HQ</button>
+                <button type="submit" class="btn btn-danger w-100 mt-3">
+                    <i class="fa fa-save"></i> Cadastrar HQ
+                </button>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Script para Atualizar Pré-visualização da Imagem e Editora -->
 <script>
-    document.getElementById("ImagemArquivo").addEventListener("change", function (event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                document.getElementById("previewImage").src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelector("#formCadastro").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-    document.getElementById("editoraSelect").addEventListener("change", function () {
-        const editoraLabel = document.getElementById("editoraLabel");
-        const selectedEditora = this.value;
+            const formData = new FormData(this);
 
-        let corEditora = "#999"; // Cor padrão
-
-        if (selectedEditora.includes("DC")) corEditora = "#0078D7";
-        else if (selectedEditora.includes("Marvel")) corEditora = "#D72638";
-        else if (selectedEditora.includes("Panini")) corEditora = "#333";
-
-        editoraLabel.style.backgroundColor = corEditora;
-        editoraLabel.textContent = selectedEditora.toUpperCase();
+            fetch(this.action, {
+                method: this.method,
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    window.location.href = "/Site/Home/Index";
+                } else {
+                    console.error("❌ Erros no cadastro:");
+                    data.erros.forEach(erro => {
+                        console.warn(`⚠️ Campo: ${erro.Campo}, Erros:`, erro.Erros);
+                    });
+                }
+            })
+            .catch(error => console.error("❌ Erro na requisição:", error));
+        });
     });
 </script>

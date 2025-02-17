@@ -24,5 +24,24 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
             return View(hqs);
         }
 
+        [HttpGet]
+        public IActionResult SearchHqs(string query)
+        {
+            var hqs = _context.HQs
+                .Where(h => h.Titulo.Contains(query))
+                .Select(h => new
+                {
+                    h.Id,
+                    h.Titulo,
+                    h.Sinopse,
+                    h.Editora,
+                    h.ImagemUrl,
+                    EditoraCor = h.Editora.ToLower().Contains("dc comics") ? "#1E88E5" :
+                                 h.Editora.ToLower().Contains("marvel comics") ? "#D32F2F" : "#333"
+                })
+                .ToList();
+
+            return Json(hqs);
+        }
     }
 }

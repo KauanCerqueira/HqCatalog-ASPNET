@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace HqCatalog.Business.Models
 {
@@ -19,6 +21,9 @@ namespace HqCatalog.Business.Models
         // 🔹 Relacionamentos com outras entidades
         public virtual ICollection<Avaliacao> Avaliacoes { get; set; }
         public virtual ICollection<HQFavorita> HQsFavoritas { get; set; }
+
+        [NotMapped] // 🔹 Isso impede que a propriedade seja mapeada no banco de dados
+        public IFormFile ImagemArquivo { get; set; }
 
         public Hq()
         {

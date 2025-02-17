@@ -8,12 +8,12 @@
     <div class="auth-card">
         <h2 class="text-center">Cadastro</h2>
 
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger text-center">@TempData["Error"]</div>
-        }
+        <div id="errorMessage" class="alert alert-danger text-center d-none"></div>
+        <div id="successMessage" class="alert alert-success text-center d-none"></div>
 
-        <form asp-area="Site" asp-controller="Account" asp-action="Register" method="post">
+        <form id="registerForm" asp-area="Site" asp-controller="Account" asp-action="Register" method="post">
+            @Html.AntiForgeryToken() <!-- 🔹 Token CSRF Correto -->
+
             <div class="mb-3">
                 <label for="nome" class="form-label">Nome</label>
                 <div class="input-group">
@@ -47,14 +47,71 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-success w-100">Cadastrar</button>
+            <button type="submit" id="registerButton" class="btn btn-success w-100">Cadastrar</button>
         </form>
 
-            <div class="text-center mt-3">
-                <a href="@Url.Action("Login", "Account", new { area = "Site" })">Já tem uma conta? Entrar</a>
-            </div>
-        </form>
+        <div class="text-center mt-3">
+            <a href="@Url.Action("Login", "Account", new { area = "Site" })">Já tem uma conta? Entrar</a>
+        </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const registerForm = document.getElementById("registerForm");
+        const registerButton = document.getElementById("registerButton");
+        const errorMessage = document.getElementById("errorMessage");
+        const successMessage = document.getElementById("successMessage");
+
+        if (registerForm) {
+            registerForm.addEventListener("submit", function (event) {
+                event.preventDefault(); // 🔹 Impede envio incorreto
+                console.log("🔹 Enviando Registro via fetch...");
+
+                registerButton.disabled = true; // 🔹 Evita múltiplos cliques
+
+                const formData = new FormData(registerForm);
+                const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                fetch('/Site/Account/Register', {
+                    method: 'POST',
+                    body: new URLSearchParams(formData),
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': csrfToken
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    registerButton.disabled = false; // 🔹 Reativa o botão
+
+                    if (data.success) {
+                        console.log("✅ Registro realizado e login efetuado com sucesso!");
+                        successMessage.innerText = "Cadastro realizado! Redirecionando...";
+                        successMessage.classList.remove("d-none");
+                        setTimeout(() => {
+                            window.location.href = "/Site/Home/Index"; // 🔹 Redireciona para a Home automaticamente
+                        }, 2000);
+                    } else {
+                        console.error("❌ Erro ao registrar:", data.error);
+                        errorMessage.innerText = data.error;
+                        errorMessage.classList.remove("d-none");
+                    }
+                })
+                .catch(error => {
+                    registerButton.disabled = false; // 🔹 Reativa o botão em caso de erro
+                    console.error("❌ Erro na requisição de Registro:", error);
+                    errorMessage.innerText = "Erro ao processar o cadastro. Tente novamente.";
+                    errorMessage.classList.remove("d-none");
+                });
+            });
+        }
+    });
+</script>
 
 <script src="~/js/auth.js"></script>

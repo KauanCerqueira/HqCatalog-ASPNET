@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <title>@ViewData["Title"] - Meu Site</title>
+    <title>@(ViewData["Title"] ?? "Meu Site") - Meu Site</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -43,13 +43,11 @@
 
             <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
                 <ul class="navbar-nav">
-                    @inject SignInManager<ApplicationUser> SignInManager
-
                     @if (SignInManager.IsSignedIn(User))
                     {
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle user-menu" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fa fa-user-circle"></i> @User.Identity.Name
+                                <i class="fa fa-user-circle"></i> @User.Identity?.Name
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li>
@@ -59,8 +57,8 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form id="logoutForm" asp-area="Site" asp-controller="Account" asp-action="Logout" method="post">
-                                        @Html.AntiForgeryToken()
+                                    <form id="logoutForm" method="post" asp-area="Site" asp-controller="Account" asp-action="Logout">
+                                        @Html.AntiForgeryToken() <!-- 🔹 Token CSRF correto -->
                                         <button type="submit" class="dropdown-item text-danger">
                                             <i class="fa fa-sign-out-alt"></i> Sair
                                         </button>
@@ -102,13 +100,37 @@
     <script src="~/js/site.js"></script>
     <script src="~/js/script.js"></script>
 
+    <!-- Permite que cada página inclua scripts específicos -->
+    @RenderSection("Scripts", required: false)
+
+    <!-- Script para corrigir envio de logout -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const logoutForm = document.getElementById("logoutForm");
 
             if (logoutForm) {
-                logoutForm.addEventListener("submit", function () {
-                    console.log("Logout acionado"); // 🔹 Log para verificar se o botão está sendo clicado
+                logoutForm.addEventListener("submit", function (event) {
+                    event.preventDefault(); // 🔹 Evita envio incorreto do formulário
+                    console.log("🔹 Enviando Logout via fetch...");
+
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    fetch('/Site/Account/Logout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token
+                        }
+                    }).then(response => {
+                        if (response.ok) {
+                            console.log("✅ Logout realizado com sucesso!");
+                            window.location.href = "/Site/Account/Login";
+                        } else {
+                            console.error("❌ Erro ao deslogar:", response);
+                        }
+                    }).catch(error => {
+                        console.error("❌ Erro na requisição de Logout:", error);
+                    });
                 });
             }
         });
