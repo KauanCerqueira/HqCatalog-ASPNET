@@ -55,73 +55,72 @@ public class HqController : Controller
 
     [HttpPost("Create")]
     [ValidateAntiForgeryToken]
-    public IActionResult Create(Hq hq, IFormFile ImagemArquivo)
+    public IActionResult Create([FromForm] Hq hq, [FromForm] IFormFile ImagemArquivo)
     {
         _logger.LogInformation("🔹 Recebendo solicitação de cadastro de HQ...");
 
-        // 🔹 Log dos dados recebidos
-        _logger.LogInformation("📌 Dados Recebidos:");
-        _logger.LogInformation("➡ Titulo: {Titulo}", hq.Titulo ?? "(Vazio)");
-        _logger.LogInformation("➡ Autor: {Autor}", hq.Autor ?? "(Vazio)");
-        _logger.LogInformation("➡ Editora: {Editora}", hq.Editora ?? "(Vazio)");
-        _logger.LogInformation("➡ AnoPublicacao: {AnoPublicacao}", hq.AnoPublicacao);
-        _logger.LogInformation("➡ Genero: {Genero}", hq.Genero ?? "(Vazio)");
-        _logger.LogInformation("➡ Personagem: {Personagem}", hq.Personagem ?? "(Vazio)");
-        _logger.LogInformation("➡ Sinopse: {DescricaoCompleta}", hq.DescricaoCompleta ?? "(Vazio)");
-        _logger.LogInformation("➡ ImagemArquivo: {ImagemArquivo}", ImagemArquivo?.FileName ?? "Nenhum arquivo enviado");
+        // Verifica se a imagem foi enviada corretamente
+        if (ImagemArquivo == null || ImagemArquivo.Length == 0)
+        {
+            _logger.LogError("❌ Nenhuma imagem foi enviada.");
+            return BadRequest(new { sucesso = false, erros = new[] { new { Campo = "ImagemArquivo", Erros = new[] { "A imagem é obrigatória." } } } });
+        }
 
+        _logger.LogInformation("📌 Imagem recebida: {NomeArquivo}", ImagemArquivo.FileName);
+
+        // Verifica se o ModelState é válido
         if (!ModelState.IsValid)
         {
             var erros = ModelState
                 .Where(x => x.Value.Errors.Any())
                 .Select(x => new
                 {
-                    Campo = x.Key,
-                    Erros = x.Value.Errors.Select(e => e.ErrorMessage).ToList()
+                    Campo = x.Key ?? "Desconhecido",
+                    Erros = x.Value.Errors?.Select(e => e.ErrorMessage).ToList() ?? new List<string> { "Erro desconhecido" }
                 })
                 .ToList();
 
-            if (!erros.Any())
-            {
-                erros.Add(new { Campo = "Desconhecido", Erros = new List<string> { "Erro desconhecido no envio." } });
-            }
-
-            foreach (var erro in erros)
-            {
-                _logger.LogError("❌ Campo: {Campo}, Erros: {Erros}", erro.Campo, string.Join(", ", erro.Erros));
-            }
-
-            return Json(new { sucesso = false, erros });
+            _logger.LogError("❌ Erros de validação: {Erros}", erros);
+            return BadRequest(new { sucesso = false, erros });
         }
 
-        if (ImagemArquivo != null && ImagemArquivo.Length > 0)
+        try
         {
+            // Diretório de armazenamento das imagens
             string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/hqs");
             if (!Directory.Exists(uploadPath))
             {
                 Directory.CreateDirectory(uploadPath);
             }
 
+            // Gera um nome único para a imagem
             string fileName = $"{Guid.NewGuid()}{Path.GetExtension(ImagemArquivo.FileName)}";
             string filePath = Path.Combine(uploadPath, fileName);
 
+            // Salva a imagem no diretório
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 ImagemArquivo.CopyTo(stream);
             }
 
             hq.ImagemUrl = fileName;
+
+            _context.HQs.Add(hq);
+            _context.SaveChanges();
+
+            _logger.LogInformation("✅ HQ cadastrada com sucesso: {Titulo} (ID: {Id})", hq.Titulo, hq.Id);
+
+            return Json(new
+            {
+                sucesso = true,
+                imagemUrl = $"/imagens/hqs/{hq.ImagemUrl}",
+                editora = hq.Editora
+            });
         }
-        else
+        catch (Exception ex)
         {
-            hq.ImagemUrl = "placeholder.jpg";
+            _logger.LogError("🚨 Erro interno ao cadastrar HQ: {Mensagem}", ex.Message);
+            return StatusCode(500, new { sucesso = false, erro = "Erro interno no servidor. Tente novamente mais tarde." });
         }
-
-        _context.HQs.Add(hq);
-        _context.SaveChanges();
-
-        _logger.LogInformation("✅ HQ cadastrada com sucesso: {Titulo} (ID: {Id})", hq.Titulo, hq.Id);
-
-        return Json(new { sucesso = true });
     }
 }

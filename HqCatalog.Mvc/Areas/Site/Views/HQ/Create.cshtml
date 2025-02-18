@@ -12,7 +12,7 @@
                     EDITORA
                 </div>
                 <img id="previewImage" src="~/imagens/hqs/placeholder.jpg" class="hq-image-details" alt="Pré-visualização da HQ">
-                <input type="file" asp-for="ImagemArquivo" id="ImagemArquivo" class="form-control mt-3" accept="image/*">
+                <input type="file" name="ImagemArquivo" id="ImagemArquivo" class="form-control mt-3" accept="image/*">
             </div>
         </div>
 
@@ -23,13 +23,13 @@
                 @Html.AntiForgeryToken()
 
                 <label><strong>Título:</strong></label>
-                <input asp-for="Titulo" class="form-control" required>
+                <input type="text" name="Titulo" id="Titulo" class="form-control" required>
 
                 <label><strong>Autor:</strong></label>
-                <input asp-for="Autor" class="form-control" required>
+                <input type="text" name="Autor" id="Autor" class="form-control" required>
 
                 <label><strong>Editora:</strong></label>
-                <input list="editoras" asp-for="Editora" class="form-control" required>
+                <input list="editoras" name="Editora" id="Editora" class="form-control" required>
 
                 <datalist id="editoras">
                     <option value="DC Comics">
@@ -40,16 +40,16 @@
                 </datalist>
 
                 <label><strong>Ano de Publicação:</strong></label>
-                <input asp-for="AnoPublicacao" type="number" class="form-control" required>
+                <input type="number" name="AnoPublicacao" id="AnoPublicacao" class="form-control" required>
 
                 <label><strong>Gênero:</strong></label>
-                <input asp-for="Genero" class="form-control" required>
+                <input type="text" name="Genero" id="Genero" class="form-control" required>
 
                 <label><strong>Personagem:</strong></label>
-                <input asp-for="Personagem" class="form-control" required>
+                <input type="text" name="Personagem" id="Personagem" class="form-control" required>
 
                 <label><strong>Sinopse:</strong></label>
-                <textarea asp-for="DescricaoCompleta" class="form-control" rows="3" required></textarea>
+                <textarea name="DescricaoCompleta" id="DescricaoCompleta" class="form-control" rows="3" required></textarea>
 
                 <button type="submit" class="btn btn-danger w-100 mt-3">
                     <i class="fa fa-save"></i> Cadastrar HQ
@@ -59,29 +59,106 @@
     </div>
 </div>
 
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        document.querySelector("#formCadastro").addEventListener("submit", function (event) {
+        const formCadastro = document.querySelector("#formCadastro");
+        const editoraLabel = document.querySelector("#editoraLabel");
+        const imgPreview = document.querySelector("#previewImage");
+        const imgInput = document.querySelector("#ImagemArquivo");
+        const editoraInput = document.querySelector("#Editora");
+
+        // Mapeia cores para editoras conhecidas
+        const coresEditoras = {
+            "Marvel Comics": "#D32F2F", // Vermelho Marvel
+            "DC Comics": "#1976D2", // Azul DC
+            "Panini": "#FBC02D", // Amarelo Panini
+            "Image Comics": "#757575", // Cinza Image Comics
+            "Shueisha": "#2E7D32" // Verde Shueisha
+        };
+
+        // Atualiza o nome da editora ao digitar
+        editoraInput.addEventListener("input", function () {
+            editoraLabel.textContent = editoraInput.value || "EDITORA";
+            const cor = coresEditoras[editoraInput.value] || "#999"; // Cor padrão
+            editoraLabel.style.backgroundColor = cor;
+        });
+
+        // Atualiza a imagem da capa ao selecionar um arquivo
+        imgInput.addEventListener("change", function () {
+            if (imgInput.files && imgInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imgPreview.src = e.target.result;
+                };
+                reader.readAsDataURL(imgInput.files[0]);
+            }
+        });
+
+        formCadastro.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const formData = new FormData(this);
+            const formData = new FormData(formCadastro);
 
-            fetch(this.action, {
-                method: this.method,
+            // Garantir que o arquivo da imagem está sendo enviado
+            if (imgInput.files.length > 0) {
+                formData.append("ImagemArquivo", imgInput.files[0]);
+            }
+
+            console.log("🔹 Dados sendo enviados:");
+            for (let [key, value] of formData.entries()) {
+                console.log(`➡ ${key}:`, value);
+            }
+
+            fetch(formCadastro.action, {
+                method: "POST",
                 body: formData
             })
-            .then(response => response.json())
+            .then(async response => {
+                let jsonResponse;
+                try {
+                    jsonResponse = await response.json();
+                } catch (e) {
+                    throw { status: response.status, body: "Resposta vazia do servidor" };
+                }
+
+                if (!response.ok) {
+                    throw { status: response.status, body: jsonResponse };
+                }
+
+                return jsonResponse;
+            })
             .then(data => {
+                console.log("🔹 Resposta do servidor:", data);
+
                 if (data.sucesso) {
-                    window.location.href = "/Site/Home/Index";
+                    console.log("✅ Cadastro realizado com sucesso!");
+
+                    // Atualiza a imagem e o nome da editora no front-end
+                    if (data.imagemUrl) {
+                        imgPreview.src = data.imagemUrl;
+                    }
+
+                    if (data.editora) {
+                        editoraLabel.textContent = data.editora;
+                        editoraLabel.style.backgroundColor = coresEditoras[data.editora] || "#999";
+                    }
+
+                    // Redireciona para a home
+                    setTimeout(() => {
+                        window.location.href = "/Site/Home/Index";
+                    }, 1500);
                 } else {
-                    console.error("❌ Erros no cadastro:");
-                    data.erros.forEach(erro => {
-                        console.warn(`⚠️ Campo: ${erro.Campo}, Erros:`, erro.Erros);
-                    });
+                    console.error("❌ Erros no cadastro:", data.erros);
                 }
             })
-            .catch(error => console.error("❌ Erro na requisição:", error));
+            .catch(error => {
+                console.error(`🚨 Erro na requisição (${error.status || "Sem código HTTP"}):`, error.body || "Resposta vazia do servidor");
+            });
         });
     });
 </script>
+
+ 
+
+
