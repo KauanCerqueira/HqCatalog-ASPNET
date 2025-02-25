@@ -1,8 +1,6 @@
 ﻿using HqCatalog.Business.Models;
-using System;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace HqCatalog.Business.Interfaces
@@ -14,5 +12,8 @@ namespace HqCatalog.Business.Interfaces
         Task Adicionar(Hq hq);
         Task Atualizar(Hq hq);
         Task Remover(int id);
+
+        // 🔹 Novo método para salvar a imagem e retornar o nome do arquivo salvo
+        Task<string> SalvarImagem(IFormFile imagemArquivo);
     }
 }

@@ -295,7 +295,7 @@ Descubra Agora
     top: 0;
     left: 0;
     width: 100%; /* 🔹 Faz o balão preencher toda a largura do card */
-    height: 40px; /* 🔹 Define uma altura fixa para o balão */
+    height: 30px; /* 🔹 Define uma altura fixa para o balão */
     display: flex;
     align-items: center; /* 🔹 Centraliza verticalmente o texto */
     justify-content: center; /* 🔹 Centraliza horizontalmente o texto */

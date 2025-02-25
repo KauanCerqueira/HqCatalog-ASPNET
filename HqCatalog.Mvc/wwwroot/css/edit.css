@@ -1,0 +1,216 @@
+﻿/* 🌟 Estilização da Tela de Edição de HQ */
+
+/* 🌟 Container Principal */
+.edit-hq-container {
+    max-width: 700px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+    /* 🌟 Título */
+    .edit-hq-container h2 {
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    /* 🌟 Formulário */
+    .edit-hq-container form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 🌟 Inputs */
+    .edit-hq-container input,
+    .edit-hq-container textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+
+        .edit-hq-container input:focus,
+        .edit-hq-container textarea:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+        }
+
+    /* 🌟 Labels */
+    .edit-hq-container label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #555;
+    }
+
+    /* 🌟 Botões */
+    .edit-hq-container .btn-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    .edit-hq-container button {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        margin: 0 5px;
+        border: none;
+    }
+
+    .edit-hq-container .btn-save {
+        background: #28a745;
+    }
+
+        .edit-hq-container .btn-save:hover {
+            background: #218838;
+        }
+
+    .edit-hq-container .btn-cancel {
+        background: #6c757d;
+        text-align: center;
+        padding: 12px;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+        .edit-hq-container .btn-cancel:hover {
+            background: #545b62;
+        }
+
+/* 🌟 Responsividade */
+@media (max-width: 768px) {
+    .edit-hq-container {
+        width: 90%;
+        padding: 15px;
+    }
+
+        .edit-hq-container h2 {
+            font-size: 24px;
+        }
+
+        .edit-hq-container button {
+            font-size: 14px;
+            padding: 10px;
+        }
+}
+/* 🌟 Estilização dos Inputs */
+.input-container {
+    margin-bottom: 1rem;
+}
+
+.input-label {
+    display: block;
+    color: #4a4a4a;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.input-field {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background: white;
+    transition: all 0.3s ease-in-out;
+}
+
+    .input-field:focus {
+        border-color: #007bff;
+        outline: none;
+        color: #333;
+    }
+
+.input-description {
+    display: block;
+    color: #777;
+    font-size: 12px;
+    padding-top: 4px;
+}
+
+/* 🌟 Ajuste dos Botões */
+.button {
+    padding: 10px 15px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.button-save {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+
+.button-cancel {
+    background-color: #6c757d; /* Cinza */
+    color: white;
+}
+
+.button:hover {
+    opacity: 0.8;
+}
+/* 🌟 Estilização do Botão para Trocar Imagem */
+.custum-file-upload {
+    height: 200px;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    justify-content: center;
+    border: 2px dashed #cacaca;
+    background-color: rgba(255, 255, 255, 1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0px 48px 35px -48px rgba(0,0,0,0.1);
+    transition: all 0.3s ease-in-out;
+}
+
+    .custum-file-upload:hover {
+        border-color: #007bff;
+        background-color: rgba(240, 240, 240, 1);
+    }
+
+    .custum-file-upload .icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .custum-file-upload .icon svg {
+            height: 80px;
+            fill: rgba(75, 85, 99, 1);
+        }
+
+    .custum-file-upload .text {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        .custum-file-upload .text span {
+            font-weight: 400;
+            color: rgba(75, 85, 99, 1);
+        }
+
+    .custum-file-upload input {
+        display: none;
+    }

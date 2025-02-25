@@ -6,19 +6,25 @@
 }
 
 <div class="col-lg-4 col-md-6 col-sm-12 d-flex align-items-stretch hq-item">
-    <div class="hq-card text-center shadow-sm">
+    <div class="hq-card">
         <div class="hq-editora-bubble" style="background-color: @editoraCor">
             <span>@Model.Editora</span>
         </div>
 
-        <img src="~/imagens/hqs/@Model.ImagemUrl" class="hq-image" alt="@Model.Titulo">
+        <img src="@Url.Content("~/imagens/hqs/" + Model.ImagemUrl)" class="hq-image" alt="@Model.Titulo">
 
         <div class="hq-info">
             <h5 class="hq-title">@Model.Titulo</h5>
             <p class="hq-description">@Model.Sinopse</p>
-            <a href="@Url.Action("Detalhes", "Hq", new { id = Model.Id })" class="hq-button" style="background-color: @editoraCor">
-                Descubra Agora
-            </a>
+
+            <!-- Botão Descubra Agora -->
+            <div class="hq-button-container">
+                <a href="@Url.Action("Detalhes", "Hq", new { id = Model.Id })" class="hq-button full-rounded">
+                    <span>Descubra Agora</span>
+                    <div class="border"></div>
+                </a>
+            </div>
+
         </div>
     </div>
 </div>

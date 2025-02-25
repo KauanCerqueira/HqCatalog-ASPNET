@@ -40,3 +40,123 @@
     font-size: 16px;
     white-space: nowrap;
 }
+/* 🌟 Estilização do Card de HQ */
+.hq-card {
+    width: 190px;
+    height: 254px;
+    border-radius: 50px;
+    background: #e0e0e0;
+    box-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    /* 🌟 Efeito de Hover no Card */
+    .hq-card:hover {
+        transform: scale(1.05);
+        box-shadow: 10px 10px 30px #bebebe, -10px -10px 30px #ffffff;
+    }
+
+    /* 🌟 Ajuste da Imagem da HQ */
+    .hq-card img {
+        width: 100%;
+        height: 60%;
+        object-fit: cover;
+        border-radius: 15px;
+    }
+
+/* 🌟 Nome da Editora dentro do Card */
+.hq-editora-bubble {
+    font-weight: bold;
+    padding: 10px 10px;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 3px;
+}
+
+/* 🌟 Título e Sinopse */
+.hq-title {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.hq-description {
+    font-size: 14px;
+    color: #555;
+}
+
+/* 🌟 Botão no Card */
+.hq-button {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+    .hq-button:hover {
+        opacity: 0.9;
+    }
+/* 🌟 Botão minimalista com borda preta no hover */
+.hq-button {
+    font-size: 16px;
+    position: relative;
+    margin: auto;
+    padding: 1em 2.5em;
+    border: none;
+    background: #fff;
+    transition: all 0.1s linear;
+    box-shadow: 0 0.4em 1em rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+    /* 🌟 Efeito de clique (botão levemente pressionado) */
+    .hq-button:active {
+        transform: scale(0.95);
+    }
+
+    /* 🌟 Cor do texto */
+    .hq-button span {
+        color: #464646; /* Cinza escuro */
+    }
+
+    /* 🌟 Borda inicial invisível */
+    .hq-button .border {
+        position: absolute;
+        border: 0.15em solid transparent; /* Inicialmente sem cor */
+        transition: all 0.3s ease-in-out;
+        top: 50%;
+        left: 50%;
+        width: 9em;
+        height: 3em;
+        transform: translate(-50%, -50%);
+    }
+
+    /* 🌟 Efeito de hover - borda preta */
+    .hq-button:hover .border {
+        border-color: black;
+        width: 9.9em;
+        height: 3.7em;
+    }
+
+/* 🌟 Bordas arredondadas */
+.full-rounded {
+    border-radius: 2em;
+}
+
+/* 🌟 Centraliza o botão dentro do card */
+.hq-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}

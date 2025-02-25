@@ -31,39 +31,165 @@
 
             <!-- Botões -->
             <div class="hq-buttons-grid">
-                <!-- Botão de Baixar -->
+                <!-- Botão de Baixar (Verde) -->
                 <a href="~/imagens/hqs/@Model.ImagemUrl" download="@($"{Model.Titulo.Replace(" ", "_")}.jpg")"
-                   class="hq-button hq-download-btn">
-                    Baixar HQ
+                   class="animated-button download-btn">
+                    <span>Baixar HQ</span>
+                    <span></span>
                 </a>
 
-                <!-- Botão de Apagar -->
-                <button type="button" class="hq-button hq-delete-btn" onclick="confirmarExclusao(@Model.Id)">
-                    Apagar HQ
+                <!-- Botão de Editar -->
+                <a href="@Url.Action("Editar", "Hq", new { id = Model.Id })" class="animated-button edit-btn">
+                    <span>Editar HQ</span>
+                    <span></span>
+                </a>
+
+
+                <!-- Botão de Apagar (Vermelho) -->
+                <button type="button" class="animated-button delete-btn" onclick="confirmarExclusao(@Model.Id)">
+                    <span>Apagar HQ</span>
+                    <span></span>
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Script para Exclusão -->
-<script>
-    function confirmarExclusao(hqId) {
-        if (confirm("Tem certeza que deseja excluir esta HQ?")) {
-            fetch(`/Site/Hq/Excluir`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
-                },
-                body: JSON.stringify({ id: hqId })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message); // Exibe alerta de sucesso
-                window.location.href = "/Site/Home/Index"; // Redireciona para Index
-            })
-            .catch(error => console.error("Erro ao excluir a HQ:", error));
+<!-- Modal de Tela Cheia para Edição -->
+<div id="modalEdicao" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-fullscreen" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Editar HQ</h4>
+                <button type="button" class="close" data-bs-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalEdicaoContent">
+                <!-- O conteúdo da edição será carregado dinamicamente aqui -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS Personalizado -->
+<style>
+    /* 🌟 Botão Animado */
+    .animated-button {
+        position: relative;
+        display: inline-block;
+        padding: 12px 24px;
+        border: none;
+        font-size: 16px;
+        background-color: inherit;
+        border-radius: 100px;
+        font-weight: 600;
+        color: #ffffff40;
+        box-shadow: 0 0 0 2px #ffffff20;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
+    }
+
+        .animated-button span:last-child {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
         }
+
+        .animated-button span:first-child {
+            position: relative;
+            z-index: 1;
+        }
+
+        .animated-button:hover {
+            box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        .animated-button:active {
+            scale: 0.95;
+        }
+
+        .animated-button:hover span:last-child {
+            width: 150px;
+            height: 150px;
+            opacity: 1;
+        }
+
+    /* 🌟 Cores dos Botões */
+    .download-btn {
+        box-shadow: 0 0 0 2px #28a745;
+        color: #28a745;
+    }
+
+        .download-btn span:last-child {
+            background-color: #28a745;
+        }
+
+        .download-btn:hover {
+            box-shadow: 0 0 0 5px #28a74560;
+        }
+
+    .edit-btn {
+        box-shadow: 0 0 0 2px #FFC107;
+        color: #FFC107;
+    }
+
+        .edit-btn span:last-child {
+            background-color: #FFC107;
+        }
+
+        .edit-btn:hover {
+            box-shadow: 0 0 0 5px #FFC10760;
+        }
+
+    .delete-btn {
+        box-shadow: 0 0 0 2px #dc3545;
+        color: #dc3545;
+    }
+
+        .delete-btn span:last-child {
+            background-color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            box-shadow: 0 0 0 5px #dc354560;
+        }
+</style>
+
+<!-- Scripts -->
+<script>
+   
+    function confirmarExclusao(hqId) {
+        if (!confirm("Tem certeza que deseja excluir esta HQ?")) return;
+
+        fetch(`/Site/Hq/Excluir`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(hqId)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || "Erro desconhecido.");
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message);
+            window.location.href = "/Site/Home/Index";
+        })
+        .catch(error => {
+            console.error("❌ Erro ao excluir HQ:", error);
+            alert("Erro ao excluir HQ: " + error.message);
+        });
     }
 </script>

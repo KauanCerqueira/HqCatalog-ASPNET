@@ -15,15 +15,12 @@ namespace HqCatalog.Business.Models
         public string Personagem { get; set; }
         public int AnoPublicacao { get; set; }
         public string Genero { get; set; }
-        public string ImagemUrl { get; set; }
+        public string? ImagemUrl { get; set; }
         public string Sinopse { get; set; }
 
         // 🔹 Relacionamentos com outras entidades
         public virtual ICollection<Avaliacao> Avaliacoes { get; set; }
         public virtual ICollection<HQFavorita> HQsFavoritas { get; set; }
-
-        [NotMapped] // 🔹 Isso impede que a propriedade seja mapeada no banco de dados
-        public IFormFile ImagemArquivo { get; set; }
 
         public Hq()
         {

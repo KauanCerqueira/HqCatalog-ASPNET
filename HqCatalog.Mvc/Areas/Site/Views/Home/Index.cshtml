@@ -58,7 +58,7 @@
             <div class="row" id="hq-list">
                 @foreach (var hq in Model.ToList())
                 {
-                    <partial name="_HqCard" model="hq" />
+                    @await Html.PartialAsync("_HqCard", hq)
                 }
             </div>
         </div>
@@ -68,48 +68,73 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const searchInput = document.getElementById("searchInput");
-            const searchButton = document.getElementById("searchButton");
+            const checkboxes = document.querySelectorAll(".filter-checkbox");
 
-            function fetchHqs(query) {
-                fetch(`/Site/Home/SearchHqs?query=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const hqList = document.getElementById("hq-list");
-                        hqList.innerHTML = ""; // Limpa os HQs antes de exibir os novos
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener("change", applyFilters);
+            });
 
-                        data.forEach(hq => {
-                            hqList.innerHTML += `
-                                <div class="col-lg-4 col-md-6 col-sm-12 d-flex align-items-stretch hq-item">
-                                    <div class="hq-card text-center shadow-sm">
-                                        <div class="hq-editora-bubble" style="background-color: ${hq.editoraCor}">
-                                            <span>${hq.editora}</span>
-                                        </div>
-                                        <img src="/imagens/hqs/${hq.imagemUrl}" class="hq-image" alt="${hq.titulo}">
-                                        <div class="hq-info">
-                                            <h5 class="hq-title">${hq.titulo}</h5>
-                                            <p class="hq-description">${hq.sinopse}</p>
-                                            <a href="/Site/Hq/Detalhes/${hq.id}" class="hq-button" style="background-color: ${hq.editoraCor}">
-                                                Descubra Agora
-                                            </a>
-                                        </div>
+            function applyFilters() {
+                const selectedEditoras = [...document.querySelectorAll('input[data-filter="editora"]:checked')].map(cb => cb.value);
+                const selectedGeneros = [...document.querySelectorAll('input[data-filter="genero"]:checked')].map(cb => cb.value);
+
+                const filtros = {
+                    Editoras: selectedEditoras,
+                    Generos: selectedGeneros
+                };
+
+                console.log("🔹 Enviando Filtros para o Servidor:", filtros);
+
+                fetch("/Site/Hq/FiltrarHqs", { // 🔹 Corrigindo a URL para a rota correta
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(filtros)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`❌ Erro na requisição: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("✅ Dados Recebidos:", data);
+
+                    if (!Array.isArray(data)) {
+                        throw new Error("❌ Resposta inesperada do servidor.");
+                    }
+
+                    const hqList = document.getElementById("hq-list");
+                    hqList.innerHTML = ""; // Limpa a lista antes de adicionar os novos itens
+
+                    if (data.length === 0) {
+                        hqList.innerHTML = `<p class="text-center">Nenhuma HQ encontrada com os filtros selecionados.</p>`;
+                        return;
+                    }
+
+                    data.forEach(hq => {
+                        hqList.innerHTML += `
+                            <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center">
+                                <div class="hq-card text-center shadow-sm">
+                                    <div class="hq-editora-bubble" style="background-color: ${hq.editoraCor}">
+                                        <span>${hq.editora}</span>
+                                    </div>
+                                    <img src="/imagens/hqs/${hq.imagemUrl}" class="hq-image" alt="${hq.titulo}">
+                                    <div class="hq-info">
+                                        <h5 class="hq-title">${hq.titulo}</h5>
+                                        <p class="hq-description">${hq.sinopse}</p>
+                                        <a href="/Site/Hq/Detalhes/${hq.id}" class="hq-button" style="background-color: ${hq.editoraCor}">
+                                            Descubra Agora
+                                        </a>
                                     </div>
                                 </div>
-                            `;
-                        });
-                    })
-                    .catch(error => console.error("Erro ao buscar HQs:", error));
+                            </div>
+                        `;
+                    });
+                })
+                .catch(error => console.error("❌ Erro ao filtrar HQs:", error));
             }
-
-            searchButton.addEventListener("click", function () {
-                fetchHqs(searchInput.value);
-            });
-
-            searchInput.addEventListener("keyup", function (event) {
-                if (event.key === "Enter") {
-                    fetchHqs(searchInput.value);
-                }
-            });
         });
     </script>
 }
