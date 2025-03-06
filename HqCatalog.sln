@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HqCatalog.Business", "HqCat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HqCatalog.Data", "HqCatalog.Data\HqCatalog.Data.csproj", "{2FDA5327-CE5B-429C-8C87-A7DD7D8D6235}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.HqCatalog", "Api.HqCatalog\Api.HqCatalog.csproj", "{AC0D4F06-8BC7-4F06-8A39-68F8014D8BA8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HqCatalog.Api", "Api.HqCatalog\HqCatalog.Api.csproj", "{AC0D4F06-8BC7-4F06-8A39-68F8014D8BA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

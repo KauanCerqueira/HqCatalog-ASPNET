@@ -16,7 +16,7 @@ namespace HqCatalog.Business.Service
         public HqService(IHqRepository repository)
         {
             _repository = repository;
-            _uploadPath = Path.Combine(AppContext.BaseDirectory, "wwwroot/imagens/hqs");
+            _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/hqs");
 
             if (!Directory.Exists(_uploadPath))
             {
@@ -28,11 +28,29 @@ namespace HqCatalog.Business.Service
 
         public async Task<Hq> ObterPorId(int id) => await _repository.ObterPorId(id);
 
-        public async Task Adicionar(Hq hq) => await _repository.Adicionar(hq);
+        public async Task Adicionar(Hq hq)
+        {
+            if (string.IsNullOrEmpty(hq.Titulo))
+                throw new Exception("O título da HQ é obrigatório.");
 
-        public async Task Atualizar(Hq hq) => await _repository.Atualizar(hq);
+            await _repository.Adicionar(hq);
+        }
 
-        public async Task Remover(int id) => await _repository.Remover(id);
+        public async Task Atualizar(Hq hq)
+        {
+            if (string.IsNullOrEmpty(hq.Titulo))
+                throw new Exception("O título da HQ é obrigatório.");
+
+            await _repository.Atualizar(hq);
+        }
+
+        public async Task Remover(int id)
+        {
+            var hq = await _repository.ObterPorId(id);
+            if (hq == null) throw new Exception("HQ não encontrada.");
+
+            await _repository.Remover(id);
+        }
 
         public async Task<string> SalvarImagem(IFormFile imagemArquivo)
         {
