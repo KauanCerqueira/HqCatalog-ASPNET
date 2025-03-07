@@ -22,13 +22,14 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
             _signInManager = signInManager;
             _logger = logger;
         }
-
+        [AllowAnonymous]
         public IActionResult Login()
         {
             return View();
         }
 
         [HttpPost]
+        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, bool rememberMe)
         {

@@ -38,18 +38,24 @@
                     <span></span>
                 </a>
 
-                <!-- Botão de Editar -->
-                <a href="@Url.Action("Editar", "Hq", new { id = Model.Id })" class="animated-button edit-btn">
-                    <span>Editar HQ</span>
-                    <span></span>
-                </a>
+                @if (User.IsInRole("Admin"))
+                {
+                    <!-- Botão de Editar -->
+                    <a href="@Url.Action("Editar", "Hq", new { id = Model.Id })" class="animated-button edit-btn">
+                        <span>Editar HQ</span>
+                        <span></span>
+                    </a>
+                }
 
-
+                @if (User.IsInRole("Admin"))
+                {
                 <!-- Botão de Apagar (Vermelho) -->
                 <button type="button" class="animated-button delete-btn" onclick="confirmarExclusao(@Model.Id)">
                     <span>Apagar HQ</span>
                     <span></span>
                 </button>
+                }
+
             </div>
         </div>
     </div>
@@ -164,7 +170,7 @@
 
 <!-- Scripts -->
 <script>
-   
+
     function confirmarExclusao(hqId) {
         if (!confirm("Tem certeza que deseja excluir esta HQ?")) return;
 

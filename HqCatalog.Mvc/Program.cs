@@ -14,7 +14,12 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // 🔹 Verifica se o banco existe e restaura caso necessário
 RestaurarBancoSeNecessario(connectionString);
 
-// 🔹 Configuração do banco no Entity Framework
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.Authorization.AuthorizeFilter());
+});
+
+// 🔹 Configuração do Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -28,22 +33,27 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Site/Account/Login";
     options.AccessDeniedPath = "/Site/Account/AcessoNegado";
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-    options.SlidingExpiration = false;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // ⏳ Tempo de expiração ajustado
+    options.SlidingExpiration = true; // 🔁 Renova sessão ao interagir
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    options.Cookie.SameSite = SameSiteMode.None;
-    options.Events.OnSigningOut = async context => { await Task.CompletedTask; };
+    options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
 // 🔹 Adiciona suporte a sessão
-builder.Services.AddSession();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 // 🔹 Adiciona suporte a controllers e views
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+// 🔹 Configuração do pipeline de requisições
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -52,16 +62,29 @@ app.UseRouting();
 app.UseSession();
 
 // 🔹 Configura autenticação e autorização
-app.UseAuthentication();
+
 app.UseAuthorization();
 
-// 🔹 Rota para páginas dentro da pasta "Areas"
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated && !context.Request.Path.StartsWithSegments("/Site/Account/Login"))
+    {
+        context.Response.Redirect("/Site/Account/Login");
+        return;
+    }
+    await next();
+});
+
+// 🔹 Configuração de rotas
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
-// 🔹 Rota padrão para direcionar a área "Site" por padrão
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}",

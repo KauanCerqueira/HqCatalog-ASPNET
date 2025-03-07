@@ -32,9 +32,8 @@
 
         <!-- Formulário de Edição -->
         <div class="col-md-8">
-            <form method="post" asp-area="Site" asp-controller="Hq" asp-action="Editar">
-                @Html.AntiForgeryToken() <!-- 🔹 Proteção CSRF -->
-
+            <form method="post" asp-area="Site" asp-controller="Hq" asp-action="Editar" asp-route-id="@Model.Id">
+                @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
 
                 <label>Título:</label>
@@ -44,7 +43,7 @@
                 <input type="text" asp-for="Autor" class="form-control" required />
 
                 <label>Ano de Publicação:</label>
-                <input type="text" asp-for="AnoPublicacao" class="form-control" required />
+                <input type="number" asp-for="AnoPublicacao" class="form-control" required />
 
                 <label>Editora:</label>
                 <input type="text" asp-for="Editora" class="form-control" required />
@@ -55,11 +54,9 @@
                 <label>Descrição:</label>
                 <textarea asp-for="DescricaoCompleta" class="form-control"></textarea>
 
-                <label>Imagem da HQ:</label>
-                <input type="file" name="ImagemArquivo" class="form-control" accept="image/*">
-
                 <button type="submit" class="btn btn-success">Salvar Alterações</button>
             </form>
+
 
         </div>
     </div>
@@ -68,14 +65,46 @@
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            const formEdicao = document.getElementById("formEdicao");
             const imagemUpload = document.getElementById("imagemUpload");
             const previewImagem = document.getElementById("previewImagem");
-            const uploadContainer = document.getElementById("uploadContainer");
-            const hqPreviewContainer = document.getElementById("hqPreviewContainer");
-            const editoraBubble = document.getElementById("editoraBubble");
-            const editoraInput = document.getElementById("editoraInput");
             const removerImagem = document.getElementById("removerImagem");
+            const editoraBubble = document.getElementById("editoraBubble");
+            const editoraInput = document.getElementById("Editora"); // Corrigido conforme seu formulário original
 
+            // Evento para enviar o formulário via AJAX corretamente
+            formEdicao.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const formData = new FormData(formEdicao);
+
+                console.log("🔹 Dados sendo enviados para o servidor:");
+                formData.forEach((value, key) => {
+                    console.log(`${key}: ${value}`);
+                });
+
+                fetch(formEdicao.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.sucesso) {
+                        console.log("✅ Alteração realizada com sucesso!");
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        console.error("❌ Erros na edição:", data.erros);
+                    }
+                })
+                .catch(error => {
+                    console.error("🚨 Erro:", error);
+                });
+            });
+
+            // Pré-visualização da imagem ao selecionar
             imagemUpload.addEventListener("change", function (event) {
                 const file = event.target.files[0];
 
@@ -83,10 +112,8 @@
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         previewImagem.src = e.target.result;
-                        hqPreviewContainer.classList.remove("d-none"); // Mostra a HQ estilizada
-                        uploadContainer.classList.add("d-none"); // Esconde o upload
 
-                        // Aplica a cor com base na editora
+                        // Aplica a cor da editora
                         const editoraNome = editoraInput.value.toLowerCase();
                         if (editoraNome.includes("dc")) {
                             editoraBubble.style.backgroundColor = "#0078D7";
@@ -96,21 +123,23 @@
                             editoraBubble.innerText = "MARVEL COMICS";
                         } else {
                             editoraBubble.style.backgroundColor = "#333";
-                            editoraBubble.innerText = editoraNome ? editoraNome.toUpperCase() : "EDITORA";
+                            editoraBubble.innerText = editoraInput.value || "EDITORA";
                         }
-                    };
-                    reader.readAsDataURL(file);
-                }
+                        previewImagem.src = URL.createObjectURL(file);
+                        document.getElementById("hqPreviewContainer").classList.remove("d-none");
+                        document.getElementById("uploadContainer").classList.add("d-none");
+                    }
             });
 
-            // Remover imagem e voltar para o upload
+            // Remover imagem
             removerImagem.addEventListener("click", function () {
                 previewImagem.src = "";
-                hqPreviewContainer.classList.add("d-none"); // Oculta a HQ estilizada
-                uploadContainer.classList.remove("d-none"); // Mostra o botão de upload
-                imagemUpload.value = ""; // Reseta o input file
-                editoraBubble.innerText = "EDITORA"; // Restaura o nome da editora
+                document.getElementById("hqPreviewContainer").classList.add("d-none");
+                document.getElementById("uploadContainer").classList.remove("d-none");
+                imagemUpload.value = "";
+                editoraBubble.innerText = "EDITORA";
             });
         });
     </script>
+
 }

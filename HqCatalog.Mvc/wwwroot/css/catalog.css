@@ -1,13 +1,14 @@
 ﻿/* 🌟 Container para organizar a pesquisa e o botão */
 .search-container {
-    flex-grow: 1;
-    max-width: 500px;
-    margin-right: 10px;
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente (se necessário) */
+    margin: 20px auto; /* Margem automática para centralizar */
+    width: 100%; /* Garante que ocupe toda a largura disponível */
 }
 
 .input-group {
-    display: flex;
-    align-items: center;
+    max-width: 500px; /* Define um limite de largura para a barra de pesquisa */
     width: 100%;
 }
 

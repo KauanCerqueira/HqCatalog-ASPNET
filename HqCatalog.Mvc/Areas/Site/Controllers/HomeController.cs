@@ -1,4 +1,5 @@
 ﻿using HqCatalog.Data.Context;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -13,7 +14,7 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
         {
             _context = context;
         }
-
+        [AllowAnonymous]
         public IActionResult Index()
         {
             var hqs = _context.HQs.ToList();
@@ -23,7 +24,7 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
 
             return View(hqs);
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult SearchHqs(string query)
         {

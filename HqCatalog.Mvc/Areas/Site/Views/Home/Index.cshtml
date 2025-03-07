@@ -18,10 +18,14 @@
             </div>
         </div>
 
-        <!-- Botão de adicionar HQ -->
-        <a href="@Url.Action("Create", "Hq", new { area = "Site" })" class="btn btn-success add-hq-button">
-            + Adicionar HQ
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <!-- Botão de adicionar HQ -->
+            <a href="@Url.Action("Create", "Hq", new { area = "Site" })" class="btn btn-success add-hq-button">
+                + Adicionar HQ
+            </a>
+        }
+
     </div>
 
     <div class="row">

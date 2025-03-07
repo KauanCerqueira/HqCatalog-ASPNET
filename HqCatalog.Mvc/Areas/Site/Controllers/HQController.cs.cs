@@ -6,7 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging;
-using HqCatalog.Business.Service;
+using Microsoft.AspNetCore.Authorization;
 
 [Area("Site")]
 [Route("Site/Hq")]
@@ -21,6 +21,8 @@ public class HqController : Controller
         _logger = logger;
     }
 
+    // 🔹 Permite que qualquer usuário veja os detalhes de uma HQ
+    [AllowAnonymous]
     [HttpGet("Detalhes/{id}")]
     public IActionResult Detalhes(int id)
     {
@@ -32,68 +34,8 @@ public class HqController : Controller
         return View(hq);
     }
 
-    [HttpPost("Excluir")]
-    public IActionResult Excluir([FromBody] int id)
-    {
-        if (id <= 0)
-        {
-            return BadRequest(new { sucesso = false, message = "ID inválido." });
-        }
-
-        var hq = _context.HQs.Find(id);
-        if (hq == null)
-        {
-            return NotFound(new { sucesso = false, message = "HQ não encontrada." });
-        }
-
-        _context.HQs.Remove(hq);
-        _context.SaveChanges();
-
-        return Json(new { sucesso = true, message = "HQ excluída com sucesso!" });
-    }
-
-    // 🔹 Página de Cadastro
-    [HttpGet("Create")]
-    public IActionResult Create()
-    {
-        return View();
-    }
-
-    [HttpPost("Editar")]
-    [ValidateAntiForgeryToken] // 🔹 Garante segurança contra ataques CSRF
-    public async Task<IActionResult> Editar(Hq model)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View(model);
-        }
-
-        var hqExistente = await _context.HQs.FindAsync(model.Id);
-        if (hqExistente == null)
-        {
-            return NotFound();
-        }
-
-        // Atualiza os dados
-        hqExistente.Titulo = model.Titulo;
-        hqExistente.Autor = model.Autor;
-        hqExistente.AnoPublicacao = model.AnoPublicacao;
-        hqExistente.Editora = model.Editora;
-        hqExistente.Genero = model.Genero;
-        hqExistente.DescricaoCompleta = model.DescricaoCompleta;
-
-        if (model.ImagemUrl != null)
-        {
-            hqExistente.ImagemUrl = model.ImagemUrl; // Atualiza a imagem caso tenha sido trocada
-        }
-
-        _context.Update(hqExistente);
-        await _context.SaveChangesAsync();
-
-        return RedirectToAction("Detalhes", new { id = model.Id }); // 🔹 Redireciona para os detalhes da HQ
-    }
-
-
+    // 🔹 Permite que qualquer usuário filtre as HQs sem precisar de login
+    [AllowAnonymous]
     [HttpPost("FiltrarHqs")]
     public IActionResult FiltrarHqs([FromBody] FiltroHqViewModel filtros)
     {
@@ -101,10 +43,6 @@ public class HqController : Controller
         {
             return BadRequest("❌ Nenhum filtro recebido.");
         }
-
-        Console.WriteLine("🔹 Filtros Recebidos:");
-        Console.WriteLine($"Editoras: {string.Join(", ", filtros.Editoras ?? new List<string>())}");
-        Console.WriteLine($"Gêneros: {string.Join(", ", filtros.Generos ?? new List<string>())}");
 
         var hqs = _context.HQs.AsQueryable();
 
@@ -132,6 +70,86 @@ public class HqController : Controller
         return Json(resultado);
     }
 
+    // 🔹 Apenas administradores podem criar HQs
+    [Authorize(Roles = "Admin")]
+    [HttpGet("Create")]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [Area("Site")]
+    [Authorize(Roles = "Admin")]
+    [HttpGet("Site/Hq/Editar/{id}")]
+    public async Task<IActionResult> Editar(int id)
+    {
+        var hq = await _context.HQs.FindAsync(id);
+
+        if (hq == null)
+            return NotFound();
+
+        return View(hq);
+    }
+
+    [Area("Site")]
+    [Authorize(Roles = "Admin")]
+    [HttpPost("Site/Hq/Editar/{id}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Editar(int id, [FromForm] Hq model)
+    {
+        if (id != model.Id)
+        {
+            return BadRequest("ID não corresponde.");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new { sucesso = false, erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
+        }
+
+        var hqExistente = await _context.HQs.FindAsync(id);
+        if (hqExistente == null)
+        {
+            return NotFound();
+        }
+
+        hqExistente.Titulo = model.Titulo;
+        hqExistente.Autor = model.Autor;
+        hqExistente.AnoPublicacao = model.AnoPublicacao;
+        hqExistente.Editora = model.Editora;
+        hqExistente.Genero = model.Genero;
+        hqExistente.DescricaoCompleta = model.DescricaoCompleta;
+
+        await _context.SaveChangesAsync();
+
+        return Json(new { sucesso = true, redirectUrl = Url.Action("Detalhes", new { id = model.Id }) });
+    }
+
+
+    // 🔹 Apenas administradores podem excluir HQs
+    [Authorize(Roles = "Admin")]
+    [HttpPost("Excluir")]
+    public IActionResult Excluir([FromBody] int id)
+    {
+        if (id <= 0)
+        {
+            return BadRequest(new { sucesso = false, message = "ID inválido." });
+        }
+
+        var hq = _context.HQs.Find(id);
+        if (hq == null)
+        {
+            return NotFound(new { sucesso = false, message = "HQ não encontrada." });
+        }
+
+        _context.HQs.Remove(hq);
+        _context.SaveChanges();
+
+        return Json(new { sucesso = true, message = "HQ excluída com sucesso!" });
+    }
+
+    // 🔹 Apenas administradores podem criar novas HQs
+    [Authorize(Roles = "Admin")]
     [HttpPost("Create")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([FromForm] Hq hq, [FromForm] IFormFile ImagemArquivo)
@@ -140,7 +158,6 @@ public class HqController : Controller
 
         try
         {
-            // 📌 Salva a imagem primeiro
             if (ImagemArquivo != null && ImagemArquivo.Length > 0)
             {
                 string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/hqs");
@@ -157,7 +174,7 @@ public class HqController : Controller
                     await ImagemArquivo.CopyToAsync(stream);
                 }
 
-                hq.ImagemUrl = fileName; // ❗️ Agora preenche antes da validação
+                hq.ImagemUrl = fileName;
             }
             else
             {
@@ -165,20 +182,9 @@ public class HqController : Controller
                 return BadRequest(new { sucesso = false, erros = new[] { new { Campo = "ImagemArquivo", Erros = new[] { "A imagem é obrigatória." } } } });
             }
 
-            // 📌 Só valida o ModelState **depois** de preencher `ImagemUrl`
             if (!ModelState.IsValid)
             {
-                var erros = ModelState
-                    .Where(x => x.Value.Errors.Any())
-                    .Select(x => new
-                    {
-                        Campo = x.Key ?? "Desconhecido",
-                        Erros = x.Value.Errors?.Select(e => e.ErrorMessage).ToList() ?? new List<string> { "Erro desconhecido" }
-                    })
-                    .ToList();
-
-                _logger.LogError("❌ Erros de validação: {Erros}", erros);
-                return BadRequest(new { sucesso = false, erros });
+                return BadRequest(new { sucesso = false, erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
             }
 
             _context.HQs.Add(hq);

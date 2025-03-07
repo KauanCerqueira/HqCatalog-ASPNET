@@ -64,30 +64,29 @@
 
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const formCadastro = document.querySelector("#formCadastro");
-        const editoraLabel = document.querySelector("#editoraLabel");
-        const imgPreview = document.querySelector("#previewImage");
-        const imgInput = document.querySelector("#ImagemArquivo");
-        const editoraInput = document.querySelector("#Editora");
+       document.addEventListener("DOMContentLoaded", function () {
+        const formEdicao = document.getElementById("formEdicao");
+        const imgPreview = document.getElementById("previewImagem");
+        const imgInput = document.getElementById("imagemUpload");
+        const editoraInput = document.getElementById("Editora");
+        const editoraLabel = document.getElementById("editoraBubble");
+        const removerImagem = document.getElementById("removerImagem");
 
-        // Mapeia cores para editoras conhecidas
         const coresEditoras = {
-            "Marvel Comics": "#D32F2F", // Vermelho Marvel
-            "DC Comics": "#1976D2", // Azul DC
-            "Panini": "#FBC02D", // Amarelo Panini
-            "Image Comics": "#757575", // Cinza Image Comics
-            "Shueisha": "#2E7D32" // Verde Shueisha
+            "Marvel Comics": "#D32F2F",
+            "DC Comics": "#1976D2",
+            "Panini": "#FBC02D",
+            "Image Comics": "#757575",
+            "Shueisha": "#2E7D32"
         };
 
-        // Atualiza o nome da editora ao digitar
+        // Atualiza o nome e cor da editora ao digitar
         editoraInput.addEventListener("input", function () {
-            editoraLabel.textContent = editoraInput.value || "EDITORA";
-            const cor = coresEditoras[editoraInput.value] || "#999"; // Cor padrão
-            editoraLabel.style.backgroundColor = cor;
+            editoraBubble.textContent = editoraInput.value || "EDITORA";
+            editoraBubble.style.backgroundColor = coresEditoras[editoraInput.value] || "#999";
         });
 
-        // Atualiza a imagem da capa ao selecionar um arquivo
+        // Pré-visualização da imagem ao selecionar
         imgInput.addEventListener("change", function () {
             if (imgInput.files && imgInput.files[0]) {
                 const reader = new FileReader();
@@ -98,68 +97,44 @@
             }
         });
 
-        formCadastro.addEventListener("submit", function (event) {
+        // Evento para remover imagem
+        removerImagem.addEventListener("click", function () {
+            imgPreview.src = "/imagens/hqs/placeholder.jpg";
+            imgInput.value = "";
+        });
+
+        formEdicao.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const formData = new FormData(formCadastro);
+            const formData = new FormData(formEdicao);
 
-            // Garantir que o arquivo da imagem está sendo enviado
-            if (imgInput.files.length > 0) {
-                formData.append("ImagemArquivo", imgInput.files[0]);
-            }
-
-            console.log("🔹 Dados sendo enviados:");
+            console.log("🔹 Dados enviados:");
             for (let [key, value] of formData.entries()) {
                 console.log(`➡ ${key}:`, value);
             }
 
-            fetch(formCadastro.action, {
+            fetch(formEdicao.action, {
                 method: "POST",
-                body: formData
-            })
-            .then(async response => {
-                let jsonResponse;
-                try {
-                    jsonResponse = await response.json();
-                } catch (e) {
-                    throw { status: response.status, body: "Resposta vazia do servidor" };
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
                 }
-
-                if (!response.ok) {
-                    throw { status: response.status, body: jsonResponse };
-                }
-
-                return jsonResponse;
             })
+            .then(response => response.json())
             .then(data => {
-                console.log("🔹 Resposta do servidor:", data);
-
                 if (data.sucesso) {
-                    console.log("✅ Cadastro realizado com sucesso!");
-
-                    // Atualiza a imagem e o nome da editora no front-end
-                    if (data.imagemUrl) {
-                        imgPreview.src = data.imagemUrl;
-                    }
-
-                    if (data.editora) {
-                        editoraLabel.textContent = data.editora;
-                        editoraLabel.style.backgroundColor = coresEditoras[data.editora] || "#999";
-                    }
-
-                    // Redireciona para a home
-                    setTimeout(() => {
-                        window.location.href = "/Site/Home/Index";
-                    }, 1500);
+                    console.log("✅ Alteração realizada com sucesso!");
+                    window.location.href = data.redirectUrl;
                 } else {
-                    console.error("❌ Erros no cadastro:", data.erros);
+                    console.error("❌ Erros na edição:", data.erros);
                 }
             })
             .catch(error => {
-                console.error(`🚨 Erro na requisição (${error.status || "Sem código HTTP"}):`, error.body || "Resposta vazia do servidor");
+                console.error("🚨 Erro:", error);
             });
         });
     });
+
 </script>
 
  

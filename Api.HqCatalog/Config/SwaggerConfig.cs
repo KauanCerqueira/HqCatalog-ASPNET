@@ -18,14 +18,9 @@ namespace HqCatalog.Api.Configuration
                     Description = "API para gerenciar HQs. Permite adicionar, atualizar, remover HQs e enviar imagens.",
                     Contact = new OpenApiContact
                     {
-                        Name = "Tiago",
-                        Email = "tiago@email.com",
-                        Url = new Uri("https://github.com/tiago")
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "MIT",
-                        Url = new Uri("https://opensource.org/licenses/MIT")
+                        Name = "Kauan",
+                        Email = "kauan.cerqueira198@outlook.com",
+                        Url = new Uri("https://github.com/KauanCerqueira")
                     }
                 });
 
