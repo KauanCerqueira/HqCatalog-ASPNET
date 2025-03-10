@@ -24,10 +24,10 @@ namespace HqCatalog.Api.Configuration
                     }
                 });
 
-                // 🔹 Configuração do JWT no Swagger
+                // 🔹 Adicionar suporte para autenticação JWT
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "Digite 'Bearer {seu_token}' para autenticar",
+                    Description = "Digite 'Bearer {seu_token}' abaixo para autenticar nos endpoints",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
@@ -50,7 +50,7 @@ namespace HqCatalog.Api.Configuration
                     }
                 });
 
-                // 🔹 Adicionar descrições nos endpoints automaticamente
+                // 🔹 Habilita anotações de resumo e descrição nos endpoints
                 c.EnableAnnotations();
             });
 
@@ -65,6 +65,9 @@ namespace HqCatalog.Api.Configuration
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "📚 HqCatalog API v1");
                 c.DocumentTitle = "📚 HqCatalog API - Documentação";
                 c.DisplayRequestDuration(); // Exibe tempo de resposta da API
+
+                // 🔹 Permite que o usuário digite um token manualmente
+                c.DefaultModelsExpandDepth(-1); // Oculta a seção "Schemas"
             });
 
             return app;

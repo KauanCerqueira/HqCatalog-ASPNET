@@ -26,6 +26,7 @@
 
 
 	<ItemGroup>
+		<ProjectReference Include="..\Api.HqCatalog\HqCatalog.Api.csproj" />
 		<ProjectReference Include="..\HqCatalog.Business\HqCatalog.Business.csproj" />
 		<ProjectReference Include="..\HqCatalog.Data\HqCatalog.Data.csproj" />
 	</ItemGroup>

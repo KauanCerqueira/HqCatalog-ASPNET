@@ -8,6 +8,10 @@ using System.Diagnostics;
 using System.Text;
 using HqCatalog.Api.Configuration;
 using HqCatalog.Api.Config;
+using Microsoft.Extensions.Options;
+using HqCatalog.Business.Interfaces;
+using HqCatalog.Business.Service;
+using HqCatalog.Data.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +27,20 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 // 🔹 Configuração do JWT
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"]);
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<JwtSettings>>().Value);
+
+// 🔹 Obtém as configurações do JWT
+var jwtSettings = new JwtSettings();
+builder.Configuration.GetSection("JwtSettings").Bind(jwtSettings);
+Console.WriteLine($"🔹 JWT Secret: {jwtSettings.Secret}");
+Console.WriteLine($"🔹 JWT Expiration: {jwtSettings.ExpirationHours}");
+Console.WriteLine($"🔹 JWT Issuer: {jwtSettings.Issuer}");
+Console.WriteLine($"🔹 JWT Audience: {jwtSettings.Audience}");
+builder.Services.AddSingleton(jwtSettings);
+
+// 🔹 Configuração da autenticação JWT
+var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -33,8 +50,10 @@ builder.Services.AddAuthentication("Bearer")
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
-            ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience
         };
     });
 
@@ -46,9 +65,6 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.DefaultApiVersion = new Microsoft.AspNetCore.Mvc.ApiVersion(1, 0);
 });
-var jwtSettings = new JwtSettings();
-builder.Configuration.GetSection("Jwt").Bind(jwtSettings);
-builder.Services.AddSingleton(jwtSettings);
 
 builder.Services.AddVersionedApiExplorer(options =>
 {
@@ -60,6 +76,8 @@ builder.Services.AddSwaggerConfig();
 
 // 🔹 Habilitar Controllers
 builder.Services.AddControllers();
+builder.Services.AddScoped<IHqService, HqService>(); // 🔹 Serviço de HQ
+builder.Services.AddScoped<IHqRepository, HqRepository>(); // 🔹 Repositório de HQ
 
 #endregion
 

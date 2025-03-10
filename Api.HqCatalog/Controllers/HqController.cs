@@ -1,5 +1,6 @@
 ﻿using HqCatalog.Business.Interfaces;
 using HqCatalog.Business.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -11,12 +12,13 @@ namespace HqCatalog.Api.Controllers
 {
     [Route("api/hqs")]
     [ApiController]
-    public class HqController : MainController
+    public class HqController : ControllerBase // 🔹 Alterado para ControllerBase
     {
         private readonly IHqService _hqService;
 
-        public HqController(INotificador notificador, IHqService hqService) : base(notificador)
+        public HqController(IHqService hqService) // 🔹 Removida a dependência de notificador
         {
+            _hqService = hqService ?? throw new ArgumentNullException(nameof(hqService));
             _hqService = hqService;
         }
 
@@ -37,6 +39,7 @@ namespace HqCatalog.Api.Controllers
             return hq;
         }
 
+        [Authorize] // 🔒 Requer Autenticação JWT
         [HttpPost]
         [SwaggerOperation(Summary = "Adiciona uma nova HQ", Description = "Insere uma nova HQ no catálogo.")]
         public async Task<ActionResult<Hq>> Adicionar(Hq hq)

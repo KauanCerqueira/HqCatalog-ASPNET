@@ -10,9 +10,8 @@ namespace HqCatalog.Api.Configuration
     {
         public static IServiceCollection ResolveDependencies(this IServiceCollection services)
         {
-            services.AddScoped<INotificador, NotificadorService>(); 
-            services.AddScoped<IHqRepository, HqRepository>();
-            services.AddScoped<IHqService, HqService>(); 
+            services.AddScoped<IHqRepository, HqRepository>(); // Repositório de HQs
+            services.AddScoped<IHqService, HqService>(); // Serviço que precisa ser injetado no HqController
             return services;
         }
     }
