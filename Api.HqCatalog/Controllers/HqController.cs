@@ -1,4 +1,5 @@
-﻿using HqCatalog.Business.Interfaces;
+﻿using HqCatalog.Api.Models;
+using HqCatalog.Business.Interfaces;
 using HqCatalog.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -39,15 +40,27 @@ namespace HqCatalog.Api.Controllers
             return hq;
         }
 
-        [Authorize] // 🔒 Requer Autenticação JWT
         [HttpPost]
         [SwaggerOperation(Summary = "Adiciona uma nova HQ", Description = "Insere uma nova HQ no catálogo.")]
-        public async Task<ActionResult<Hq>> Adicionar(Hq hq)
+        public async Task<ActionResult<Hq>> Adicionar([FromBody] HqCreateDTO dto)
         {
             try
             {
-                await _hqService.Adicionar(hq);
-                return CreatedAtAction(nameof(ObterPorId), new { id = hq.Id }, hq);
+                var novaHq = new Hq
+                {
+                    Titulo = dto.Titulo,
+                    Autor = dto.Autor,
+                    Editora = dto.Editora,
+                    DescricaoCompleta = dto.DescricaoCompleta,
+                    Personagem = dto.Personagem,
+                    AnoPublicacao = dto.AnoPublicacao,
+                    Genero = dto.Genero,
+                    ImagemUrl = dto.ImagemUrl = "NULL",
+                    Sinopse = dto.Sinopse
+                };
+
+                await _hqService.Adicionar(novaHq);
+                return CreatedAtAction(nameof(ObterPorId), new { id = novaHq.Id }, novaHq);
             }
             catch (Exception ex)
             {
@@ -86,13 +99,27 @@ namespace HqCatalog.Api.Controllers
             }
         }
 
-        [HttpPost("upload-imagem")]
-        [SwaggerOperation(Summary = "Envia uma imagem de HQ", Description = "Faz o upload de uma imagem para a HQ.")]
-        public async Task<ActionResult> UploadImagem(IFormFile imagem)
+        [HttpPost("upload-imagem/{id:int}")]
+        [SwaggerOperation(Summary = "Envia uma imagem de HQ e associa ao ID", Description = "Faz o upload de uma imagem para a HQ e atualiza a URL no banco de dados.")]
+        public async Task<ActionResult> UploadImagem(int id, IFormFile imagem)
         {
             try
             {
+                // ✅ Valida se a imagem foi enviada
+                if (imagem == null || imagem.Length == 0)
+                    return BadRequest(new { success = false, message = "A imagem é obrigatória." });
+
+                // ✅ Busca a HQ pelo ID
+                var hq = await _hqService.ObterPorId(id);
+                if (hq == null) return NotFound(new { success = false, message = "HQ não encontrada." });
+
+                // ✅ Salva a imagem na pasta desejada
                 var nomeArquivo = await _hqService.SalvarImagem(imagem);
+
+                // ✅ Atualiza a URL da imagem na HQ
+                hq.ImagemUrl = nomeArquivo;
+                await _hqService.Atualizar(hq);
+
                 return Ok(new { success = true, fileName = nomeArquivo });
             }
             catch (Exception ex)

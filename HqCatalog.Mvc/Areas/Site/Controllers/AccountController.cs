@@ -17,25 +17,17 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<AccountController> _logger;
-        private readonly JwtSettings _jwtSettings; // 🔹 Declarando corretamente
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger,
-            JwtSettings jwtSettings) // 🔹 Agora recebe o JwtSettings corretamente
+            ILogger<AccountController> logger) 
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
-            _jwtSettings = jwtSettings ?? throw new ArgumentNullException(nameof(jwtSettings));
-
-            // 🔹 Teste para ver se os valores do JWT estão corretos
-            _logger.LogInformation($"JWT Configurado: Secret={_jwtSettings.Secret}, Expiration={_jwtSettings.ExpirationHours}");
 
         }
-
-
 
         [AllowAnonymous]
         public IActionResult Login()

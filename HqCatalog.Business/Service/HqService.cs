@@ -16,7 +16,9 @@ namespace HqCatalog.Business.Service
         public HqService(IHqRepository repository)
         {
             _repository = repository;
-            _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/hqs");
+
+            // 🔹 Caminho atualizado para apontar para o wwwroot do MVC
+            _uploadPath = @"C:\Reps\HqCatalog-ASPNET\HqCatalog.Mvc\wwwroot\imagens\hqs";
 
             if (!Directory.Exists(_uploadPath))
             {

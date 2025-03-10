@@ -195,7 +195,7 @@ public class HqController : Controller
             return Json(new
             {
                 sucesso = true,
-                imagemUrl = $"/imagens/hqs/{hq.ImagemUrl}",
+                imagemUrl = $"~/Images/HqImage/{hq.ImagemUrl}",
                 editora = hq.Editora
             });
         }
