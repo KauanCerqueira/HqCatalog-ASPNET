@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System;
 
 namespace HqCatalog.Api.Configuration
@@ -24,16 +25,19 @@ namespace HqCatalog.Api.Configuration
                     }
                 });
 
-                // 🔹 Adicionar suporte para autenticação JWT
+                // 🔹 Configuração do JWT para o Swagger
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "Digite 'Bearer {seu_token}' abaixo para autenticar nos endpoints",
+                    Description = "Digite 'Bearer {seu_token}' abaixo para autenticar nos endpoints.",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT"
                 });
+
+                // 🔹 Exigir autenticação JWT nos endpoints protegidos
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
 
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
@@ -66,8 +70,9 @@ namespace HqCatalog.Api.Configuration
                 c.DocumentTitle = "📚 HqCatalog API - Documentação";
                 c.DisplayRequestDuration(); // Exibe tempo de resposta da API
 
-                // 🔹 Permite que o usuário digite um token manualmente
-                c.DefaultModelsExpandDepth(-1); // Oculta a seção "Schemas"
+                // 🔹 Configuração para exigir autenticação no Swagger
+                c.DefaultModelsExpandDepth(-1);
+                c.InjectJavascript("/swagger-ui/custom-auth.js"); // 🔹 Para forçar o envio do token JWT
             });
 
             return app;

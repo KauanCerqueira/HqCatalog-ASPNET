@@ -7,11 +7,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Diagnostics;
 using System.Text;
 using HqCatalog.Api.Configuration;
-using HqCatalog.Api.Config;
 using Microsoft.Extensions.Options;
 using HqCatalog.Business.Interfaces;
 using HqCatalog.Business.Service;
 using HqCatalog.Data.Repository;
+using HqCatalog.Api.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,9 +37,10 @@ Console.WriteLine($"🔹 JWT Secret: {jwtSettings.Secret}");
 Console.WriteLine($"🔹 JWT Expiration: {jwtSettings.ExpirationHours}");
 Console.WriteLine($"🔹 JWT Issuer: {jwtSettings.Issuer}");
 Console.WriteLine($"🔹 JWT Audience: {jwtSettings.Audience}");
+
 builder.Services.AddSingleton(jwtSettings);
 
-// 🔹 Configuração da autenticação JWT
+// 🔹 Configuração da autenticação e autorização JWT
 var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
@@ -57,7 +58,9 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-// 🔹 Configuração do Swagger e Versionamento da API
+builder.Services.AddAuthorization(); // 🔹 Registro correto da autorização
+
+// 🔹 Configuração do Swagger e versionamento da API
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddApiVersioning(options =>
 {
@@ -74,7 +77,7 @@ builder.Services.AddVersionedApiExplorer(options =>
 
 builder.Services.AddSwaggerConfig();
 
-// 🔹 Habilitar Controllers
+// 🔹 Habilitar Controllers e Serviços
 builder.Services.AddControllers();
 builder.Services.AddScoped<IHqService, HqService>(); // 🔹 Serviço de HQ
 builder.Services.AddScoped<IHqRepository, HqRepository>(); // 🔹 Repositório de HQ
@@ -88,10 +91,9 @@ var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionD
 
 #region 🔹 Configuração do Pipeline (Middleware)
 
-// 🔹 Middleware de segurança
-app.UseAuthentication();
-app.UseAuthorization();
 app.UseHttpsRedirection();
+app.UseAuthentication(); // 🔐 Autenticação deve vir antes da autorização
+app.UseAuthorization();
 
 // 🔹 Habilitar Swagger SEM restrição de ambiente
 app.UseSwaggerConfig();
@@ -100,7 +102,7 @@ app.UseSwaggerConfig();
 app.MapControllers();
 
 // 🔹 Abrir Swagger automaticamente no navegador ao rodar a API
-var swaggerUrl = "https://localhost:7295/swagger";
+var swaggerUrl = "https://localhost:7295/swagger/index.html"; // 🔹 Certifique-se de que a URL está correta
 Task.Delay(2000).ContinueWith(_ => Process.Start(new ProcessStartInfo
 {
     FileName = swaggerUrl,

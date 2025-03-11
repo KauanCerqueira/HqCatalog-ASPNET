@@ -13,6 +13,7 @@ namespace HqCatalog.Api.Controllers
 {
     [Route("api/hqs")]
     [ApiController]
+    [Authorize] // 🔐 Agora todos os métodos exigem autenticação por padrão
     public class HqController : ControllerBase // 🔹 Alterado para ControllerBase
     {
         private readonly IHqService _hqService;
@@ -41,6 +42,7 @@ namespace HqCatalog.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Adiciona uma nova HQ", Description = "Insere uma nova HQ no catálogo.")]
         public async Task<ActionResult<Hq>> Adicionar([FromBody] HqCreateDTO dto)
         {
@@ -69,22 +71,39 @@ namespace HqCatalog.Api.Controllers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Atualiza uma HQ existente", Description = "Atualiza os dados de uma HQ pelo seu ID.")]
-        public async Task<ActionResult> Atualizar(int id, Hq hq)
+        public async Task<IActionResult> Atualizar(int id, [FromBody] HqAtualizarDto model)
         {
-            if (id != hq.Id) return BadRequest("IDs não correspondem.");
-            try
+            if (!ModelState.IsValid)
             {
-                await _hqService.Atualizar(hq);
-                return NoContent();
+                return BadRequest(new { sucesso = false, erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
             }
-            catch (Exception ex)
+
+            var hqExistente = await _hqService.ObterPorId(id);
+            if (hqExistente == null)
             {
-                return BadRequest(new { success = false, message = ex.Message });
+                return NotFound();
             }
+
+            // Atualizando os campos necessários
+            hqExistente.Titulo = model.Titulo;
+            hqExistente.Autor = model.Autor;
+            hqExistente.AnoPublicacao = model.AnoPublicacao;
+            hqExistente.Editora = model.Editora;
+            hqExistente.Genero = model.Genero;
+            hqExistente.DescricaoCompleta = model.DescricaoCompleta;
+            hqExistente.Personagem = model.Personagem;
+            hqExistente.Sinopse = model.Sinopse;
+
+            await _hqService.Atualizar(hqExistente);
+
+            return Ok(new { sucesso = true, mensagem = "HQ atualizada com sucesso.", redirectUrl = Url.Action("Detalhes", new { id }) });
         }
 
+
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Remove uma HQ", Description = "Exclui uma HQ do catálogo pelo ID.")]
         public async Task<ActionResult> Remover(int id)
         {
@@ -100,6 +119,7 @@ namespace HqCatalog.Api.Controllers
         }
 
         [HttpPost("upload-imagem/{id:int}")]
+        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Envia uma imagem de HQ e associa ao ID", Description = "Faz o upload de uma imagem para a HQ e atualiza a URL no banco de dados.")]
         public async Task<ActionResult> UploadImagem(int id, IFormFile imagem)
         {
