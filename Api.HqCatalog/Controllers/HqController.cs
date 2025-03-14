@@ -7,13 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HqCatalog.Api.Controllers
 {
+    //[Authorize] 
     [Route("api/hqs")]
     [ApiController]
-    [Authorize] // 🔐 Agora todos os métodos exigem autenticação por padrão
+
     public class HqController : ControllerBase // 🔹 Alterado para ControllerBase
     {
         private readonly IHqService _hqService;
@@ -42,7 +44,6 @@ namespace HqCatalog.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Adiciona uma nova HQ", Description = "Insere uma nova HQ no catálogo.")]
         public async Task<ActionResult<Hq>> Adicionar([FromBody] HqCreateDTO dto)
         {
@@ -71,7 +72,6 @@ namespace HqCatalog.Api.Controllers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Atualiza uma HQ existente", Description = "Atualiza os dados de uma HQ pelo seu ID.")]
         public async Task<IActionResult> Atualizar(int id, [FromBody] HqAtualizarDto model)
         {
@@ -103,7 +103,6 @@ namespace HqCatalog.Api.Controllers
 
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Remove uma HQ", Description = "Exclui uma HQ do catálogo pelo ID.")]
         public async Task<ActionResult> Remover(int id)
         {
@@ -117,9 +116,8 @@ namespace HqCatalog.Api.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
-
+         
         [HttpPost("upload-imagem/{id:int}")]
-        [Authorize(Roles = "Admin")]
         [SwaggerOperation(Summary = "Envia uma imagem de HQ e associa ao ID", Description = "Faz o upload de uma imagem para a HQ e atualiza a URL no banco de dados.")]
         public async Task<ActionResult> UploadImagem(int id, IFormFile imagem)
         {

@@ -12,6 +12,8 @@ using HqCatalog.Business.Interfaces;
 using HqCatalog.Business.Service;
 using HqCatalog.Data.Repository;
 using HqCatalog.Api.Config;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,9 +42,10 @@ Console.WriteLine($"🔹 JWT Audience: {jwtSettings.Audience}");
 
 builder.Services.AddSingleton(jwtSettings);
 
-// 🔹 Configuração da autenticação e autorização JWT
-var key = Encoding.ASCII.GetBytes(jwtSettings.Secret);
-builder.Services.AddAuthentication("Bearer")
+// 🔹 Chave secreta para assinar o token JWT
+var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.RequireHttpsMetadata = false;
@@ -52,13 +55,53 @@ builder.Services.AddAuthentication("Bearer")
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = true,
-            ValidateAudience = true,
             ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience
+            ValidateAudience = true,
+            ValidAudience = jwtSettings.Audience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+            RoleClaimType = ClaimTypes.Role // 🔹 Garante que a role seja reconhecida corretamente
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                if (claimsIdentity != null)
+                {
+                    // 🔹 Encontra e adiciona a role ao usuário autenticado
+                    var roleClaim = claimsIdentity.FindFirst(c =>
+                        c.Type == "role" ||
+                        c.Type == "roles" ||
+                        c.Type == ClaimTypes.Role ||
+                        c.Type == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
+
+                    if (roleClaim != null)
+                    {
+                        claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, roleClaim.Value));
+                        Console.WriteLine($"✅ Role encontrada: {roleClaim.Value}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ Nenhuma role encontrada no token JWT.");
+                    }
+                }
+
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"❌ Erro de autenticação: {context.Exception.Message}");
+                return Task.CompletedTask;
+            }
         };
     });
 
-builder.Services.AddAuthorization(); // 🔹 Registro correto da autorização
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+});
 
 // 🔹 Configuração do Swagger e versionamento da API
 builder.Services.AddEndpointsApiExplorer();
@@ -92,8 +135,17 @@ var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionD
 #region 🔹 Configuração do Pipeline (Middleware)
 
 app.UseHttpsRedirection();
-app.UseAuthentication(); // 🔐 Autenticação deve vir antes da autorização
-app.UseAuthorization();
+app.UseAuthentication();  // ✅ Aplicando autenticação primeiro
+app.UseAuthorization();   // ✅ Depois vem a autorização
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"🔹 Request Path: {context.Request.Path}");
+    Console.WriteLine($"🔹 Authorization Header: {context.Request.Headers["Authorization"]}");
+    Console.WriteLine($"🔹 User Authenticated: {context.User.Identity?.IsAuthenticated}");
+    Console.WriteLine($"🔹 User Roles: {string.Join(", ", context.User.Claims.Where(c => c.Type == ClaimTypes.Role).Select(c => c.Value))}");
+    await next();
+});
 
 // 🔹 Habilitar Swagger SEM restrição de ambiente
 app.UseSwaggerConfig();

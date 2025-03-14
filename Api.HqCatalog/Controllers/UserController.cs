@@ -27,7 +27,7 @@ namespace HqCatalog.Api.Controllers
         /// Obtém todos os usuários cadastrados.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        
         [SwaggerOperation(Summary = "Lista todos os usuários", Description = "Retorna uma lista de todos os usuários cadastrados.")]
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> ObterTodosUsuarios()
         {
@@ -39,7 +39,7 @@ namespace HqCatalog.Api.Controllers
         /// Obtém um usuário pelo ID.
         /// </summary>
         [HttpGet("{id}")]
-        [Authorize(Roles = "Admin")]
+        
         [SwaggerOperation(Summary = "Busca um usuário por ID", Description = "Retorna os detalhes de um usuário específico.")]
         public async Task<ActionResult<ApplicationUser>> ObterUsuarioPorId(string id)
         {
@@ -54,7 +54,7 @@ namespace HqCatalog.Api.Controllers
         /// Atualiza os dados do usuário (Nome, Email).
         /// </summary>
         [HttpPut("{id}")]
-        [Authorize(Roles = "Admin,Usuario")]
+        
         [SwaggerOperation(Summary = "Atualiza os dados do usuário", Description = "Permite atualizar nome e email do usuário.")]
         public async Task<IActionResult> AtualizarUsuario(string id, [FromBody] AtualizarUsuarioDTO model)
         {
@@ -77,7 +77,7 @@ namespace HqCatalog.Api.Controllers
         /// Altera a senha do usuário.
         /// </summary>
         [HttpPut("alterar-senha/{id}")]
-        [Authorize(Roles = "Admin,Usuario")]
+        
         [SwaggerOperation(Summary = "Altera a senha do usuário", Description = "Permite alterar a senha do usuário.")]
         public async Task<IActionResult> AlterarSenha(string id, [FromBody] AlterarSenhaDTO model)
         {
@@ -96,7 +96,7 @@ namespace HqCatalog.Api.Controllers
         /// Atribui um papel (role) a um usuário.
         /// </summary>
         [HttpPost("atribuir-role")]
-        [Authorize(Roles = "Admin")]
+        
         [SwaggerOperation(Summary = "Atribui um papel ao usuário", Description = "Permite adicionar uma role ao usuário.")]
         public async Task<IActionResult> AtribuirRole([FromBody] AtribuirRoleDTO model)
         {

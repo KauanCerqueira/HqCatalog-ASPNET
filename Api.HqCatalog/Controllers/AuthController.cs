@@ -73,16 +73,25 @@ namespace HqCatalog.Api.Controllers
         private string GenerateJwtToken(ApplicationUser user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret); // 🔹 Aqui usamos _jwtSettings
+            var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+
+            var roles = _userManager.GetRolesAsync(user).Result; // 🔹 Obtém as roles do usuário
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, user.UserName),
+        new Claim(ClaimTypes.Email, user.Email)
+    };
+
+            // 🔹 Adiciona todas as roles do usuário
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Tipo.ToString()) // 🔹 Convertendo Enum para string
-            }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddHours(_jwtSettings.ExpirationHours),
                 Issuer = _jwtSettings.Issuer,
                 Audience = _jwtSettings.Audience,
@@ -92,6 +101,7 @@ namespace HqCatalog.Api.Controllers
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
 
         /// <summary>
         /// Modelo para registro de usuário.

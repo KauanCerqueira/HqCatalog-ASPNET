@@ -6,6 +6,7 @@
 
 <div class="container mt-5">
     <div class="row">
+        <!-- Área de Imagem -->
         <div class="col-md-6 d-flex flex-column align-items-center">
             <div class="hq-card-details">
                 <div class="hq-editora-details" id="editoraLabel" style="background-color: #999;">
@@ -16,6 +17,7 @@
             </div>
         </div>
 
+        <!-- Área de Informações da HQ -->
         <div class="col-md-6 hq-info-container">
             <h1 class="hq-title">Adicionar Nova HQ</h1>
 
@@ -62,15 +64,14 @@
     </div>
 </div>
 
-
+<!-- JavaScript corrigido -->
 <script>
        document.addEventListener("DOMContentLoaded", function () {
-        const formEdicao = document.getElementById("formEdicao");
-        const imgPreview = document.getElementById("previewImagem");
-        const imgInput = document.getElementById("imagemUpload");
+        const formCadastro = document.getElementById("formCadastro");
+        const imgPreview = document.getElementById("previewImage"); // ID correto
+        const imgInput = document.getElementById("ImagemArquivo"); // ID correto
         const editoraInput = document.getElementById("Editora");
-        const editoraLabel = document.getElementById("editoraBubble");
-        const removerImagem = document.getElementById("removerImagem");
+        const editoraLabel = document.getElementById("editoraLabel"); // ID correto
 
         const coresEditoras = {
             "Marvel Comics": "#D32F2F",
@@ -82,8 +83,8 @@
 
         // Atualiza o nome e cor da editora ao digitar
         editoraInput.addEventListener("input", function () {
-            editoraBubble.textContent = editoraInput.value || "EDITORA";
-            editoraBubble.style.backgroundColor = coresEditoras[editoraInput.value] || "#999";
+            editoraLabel.textContent = editoraInput.value || "EDITORA";
+            editoraLabel.style.backgroundColor = coresEditoras[editoraInput.value] || "#999";
         });
 
         // Pré-visualização da imagem ao selecionar
@@ -97,46 +98,43 @@
             }
         });
 
-        // Evento para remover imagem
-        removerImagem.addEventListener("click", function () {
-            imgPreview.src = "/imagens/hqs/placeholder.jpg";
-            imgInput.value = "";
-        });
-
-        formEdicao.addEventListener("submit", function (event) {
+        // Envio do formulário via AJAX
+        formCadastro.addEventListener("submit", function (event) {
             event.preventDefault();
 
-            const formData = new FormData(formEdicao);
+            const formData = new FormData(formCadastro);
 
-            console.log("🔹 Dados enviados:");
-            for (let [key, value] of formData.entries()) {
-                console.log(`➡ ${key}:`, value);
+            // 📌 Adicionando a imagem manualmente ao FormData (garantia)
+            if (imgInput.files.length > 0) {
+                formData.append("ImagemArquivo", imgInput.files[0]);
             }
 
-            fetch(formEdicao.action, {
+            // Verifica se a imagem foi anexada corretamente
+            if (!formData.has("ImagemArquivo") || formData.get("ImagemArquivo").size === 0) {
+                console.error("❌ Erro: O arquivo de imagem não foi anexado ao FormData.");
+                alert("⚠ Selecione uma imagem antes de enviar.");
+                return;
+            }
+
+            console.log("✅ Imagem incluída no FormData:", formData.get("ImagemArquivo").name);
+
+            fetch(formCadastro.action, {
                 method: "POST",
-                body: formData,
-                headers: {
-                    'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
-                }
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
                 if (data.sucesso) {
-                    console.log("✅ Alteração realizada com sucesso!");
+                    console.log("✅ HQ cadastrada com sucesso!");
                     window.location.href = data.redirectUrl;
                 } else {
-                    console.error("❌ Erros na edição:", data.erros);
+                    console.error("❌ Erros:", data.erros);
                 }
             })
             .catch(error => {
-                console.error("🚨 Erro:", error);
+                console.error("🚨 Erro no envio:", error);
             });
         });
     });
 
 </script>
-
- 
-
-

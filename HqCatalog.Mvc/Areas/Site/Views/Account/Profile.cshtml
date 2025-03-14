@@ -5,66 +5,25 @@
 }
 
 <div class="container py-5">
-    <!-- Card do Perfil -->
-    <div class="card shadow-lg rounded-4 border-0">
-        <div class="card-body p-5">
-            <h2 class="text-center text-primary fw-bold mb-4">
-                <i class="fas fa-user-circle"></i> Meu Perfil
-            </h2>
-
-            <!-- Alertas de Sucesso e Erro -->
-            @if (TempData["Success"] != null)
-            {
-                <div class="alert alert-success text-center fw-bold">
-                    <i class="fas fa-check-circle"></i> @TempData["Success"]
-                </div>
-            }
-
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger text-center fw-bold">
-                    <i class="fas fa-times-circle"></i> @TempData["Error"]
-                </div>
-            }
-
-            <!-- Formulário de Atualização de Perfil -->
-            <form asp-area="Site" asp-controller="Account" asp-action="Profile" method="post">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="CurrentUser.Id" />
-
-                <div class="mb-3">
-                    <label asp-for="CurrentUser.Nome" class="form-label fw-bold">
-                        <i class="fas fa-user"></i> Nome Completo
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-user"></i></span>
-                        <input asp-for="CurrentUser.Nome" class="form-control" required>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="CurrentUser.Email" class="form-label fw-bold">
-                        <i class="fas fa-envelope"></i> E-mail
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                        <input asp-for="CurrentUser.Email" class="form-control" required>
-                    </div>
-                </div>
-
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
-                        <i class="fas fa-save"></i> Salvar Alterações
-                    </button>
-                </div>
-            </form>
+    <!-- Alertas de Sucesso e Erro -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success text-center fw-bold">
+            <i class="fas fa-check-circle"></i> @TempData["Success"]
         </div>
-    </div>
+    }
+
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger text-center fw-bold">
+            <i class="fas fa-times-circle"></i> @TempData["Error"]
+        </div>
+    }
 
     <!-- Lista de Usuários (Apenas para Admins) -->
     @if (User.IsInRole("Admin") && Model.UsersList.Any())
     {
-        <div class="card shadow-lg rounded-4 border-0 mt-5">
+        <div class="card shadow-lg rounded-4 border-0">
             <div class="card-body p-4">
                 <h3 class="text-center text-secondary fw-bold">
                     <i class="fas fa-users"></i> Gerenciar Usuários
@@ -96,17 +55,22 @@
                                     }
                                 </td>
                                 <td>
-                                    <a asp-area="Site" asp-controller="Account" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-warning btn-sm">
+                                    <a href="@Url.Action("Edit", "Account", new { area = "Site", id = user.Id })"
+                                       class="btn btn-warning btn-sm">
                                         <i class="fas fa-edit"></i> Editar
                                     </a>
-                                    <a asp-area="Site" asp-controller="Account" asp-action="ResetPassword" asp-route-id="@user.Id" class="btn btn-info btn-sm">
+
+                                    <a href="@Url.Action("ResetPassword", "Account", new { area = "Site", id = user.Id })"
+                                       class="btn btn-info btn-sm">
                                         <i class="fas fa-key"></i> Resetar Senha
                                     </a>
-                                    <a asp-area="Site" asp-controller="Account" asp-action="ToggleUserStatus" asp-route-id="@user.Id"
+
+                                    <a href="@Url.Action("ToggleUserStatus", "Account", new { area = "Site", id = user.Id })"
                                        class="btn btn-sm @(user.Ativo ? "btn-danger" : "btn-success")">
                                         <i class="fas @(user.Ativo ? "fa-user-slash" : "fa-user-check")"></i>
                                         @(user.Ativo ? "Desativar" : "Ativar")
                                     </a>
+
                                 </td>
                             </tr>
                         }

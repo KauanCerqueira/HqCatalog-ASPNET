@@ -95,16 +95,12 @@ public class HqController : Controller
     [Authorize(Roles = "Admin")]
     [HttpPost("Site/Hq/Editar/{id}")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Editar(int id, [FromForm] Hq model)
+    public async Task<IActionResult> Editar(int id, [FromForm] Hq model, [FromForm] IFormFile ImagemArquivo)
     {
+        model.Id = id;
         if (id != model.Id)
         {
             return BadRequest("ID não corresponde.");
-        }
-
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(new { sucesso = false, erros = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
         }
 
         var hqExistente = await _context.HQs.FindAsync(id);
@@ -113,6 +109,7 @@ public class HqController : Controller
             return NotFound();
         }
 
+        // Atualiza os dados da HQ
         hqExistente.Titulo = model.Titulo;
         hqExistente.Autor = model.Autor;
         hqExistente.AnoPublicacao = model.AnoPublicacao;
@@ -120,10 +117,46 @@ public class HqController : Controller
         hqExistente.Genero = model.Genero;
         hqExistente.DescricaoCompleta = model.DescricaoCompleta;
 
+        // Verifica se foi enviada uma nova imagem
+        if (ImagemArquivo != null && ImagemArquivo.Length > 0)
+        {
+            string uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/imagens/hqs");
+            if (!Directory.Exists(uploadPath))
+            {
+                Directory.CreateDirectory(uploadPath);
+            }
+
+            // Remove a imagem antiga, se houver
+            if (!string.IsNullOrEmpty(hqExistente.ImagemUrl))
+            {
+                string imagemAntigaPath = Path.Combine(uploadPath, hqExistente.ImagemUrl);
+                if (System.IO.File.Exists(imagemAntigaPath))
+                {
+                    System.IO.File.Delete(imagemAntigaPath);
+                }
+            }
+
+            // Salva a nova imagem
+            string fileName = $"{Guid.NewGuid()}{Path.GetExtension(ImagemArquivo.FileName)}";
+            string filePath = Path.Combine(uploadPath, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await ImagemArquivo.CopyToAsync(stream);
+            }
+
+            hqExistente.ImagemUrl = fileName;
+        }
+
         await _context.SaveChangesAsync();
 
-        return Json(new { sucesso = true, redirectUrl = Url.Action("Detalhes", new { id = model.Id }) });
+        return Json(new
+        {
+            sucesso = true,
+            redirectUrl = Url.Action("Detalhes", new { id = hqExistente.Id })
+        });
     }
+
 
 
     // 🔹 Apenas administradores podem excluir HQs
@@ -196,7 +229,8 @@ public class HqController : Controller
             {
                 sucesso = true,
                 imagemUrl = $"~/Images/HqImage/{hq.ImagemUrl}",
-                editora = hq.Editora
+                editora = hq.Editora,
+                redirectUrl = Url.Action("Detalhes", "Hq", new { id = hq.Id, area = "Site" })
             });
         }
         catch (Exception ex)

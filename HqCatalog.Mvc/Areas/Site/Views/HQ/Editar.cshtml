@@ -9,58 +9,115 @@
 
     <div class="row">
         <!-- Seção de Upload da Imagem -->
-        <div class="col-md-4">
+        <div class="col-md-4 d-flex flex-column align-items-center">
             <label class="form-label"><strong>Imagem da HQ</strong></label>
 
+            <!-- Card Personalizado da HQ -->
+            <div id="hqPreviewContainer" class="hq-card shadow-lg p-3 mb-4 bg-white rounded @(string.IsNullOrEmpty(Model.ImagemUrl) ? "d-none" : "")">
+                <div id="editoraBubble" class="hq-editora-bubble">@Model.Editora</div>
+                <img id="previewImagem" class="hq-image img-fluid rounded"
+                     src="@(string.IsNullOrEmpty(Model.ImagemUrl) ? "/imagens/hqs/placeholder.jpg" : Url.Content("~/imagens/hqs/" + Model.ImagemUrl))"
+                     alt="Capa da HQ">
+
+                <!-- Botão para remover imagem -->
+                <button type="button" id="removerImagem" class="btn btn-danger btn-sm mt-2 remove-button @(string.IsNullOrEmpty(Model.ImagemUrl) ? "d-none" : "")">
+                    <i class="fas fa-trash-alt"></i> Remover Imagem
+                </button>
+            </div>
+
             <!-- Botão de Upload -->
-            <label id="uploadContainer" class="custum-file-upload text-center">
+            <label id="uploadContainer" class="custom-file-upload text-center @(string.IsNullOrEmpty(Model.ImagemUrl) ? "" : "d-none")">
                 <div class="icon">
                     <i class="fas fa-upload fa-2x"></i>
                 </div>
                 <span>Escolher Nova Imagem</span>
                 <input type="file" id="imagemUpload" name="ImagemArquivo" accept="image/*">
             </label>
-
-            <!-- Contêiner da Imagem com Hover -->
-            <div id="hqPreviewContainer" class="hq-card-container d-none">
-                <div id="editoraBubble" class="hq-editora-bubble">EDITORA</div>
-                <img id="previewImagem" class="hq-image-large img-fluid" alt="Capa da HQ">
-                <!-- Botão para remover imagem -->
-                <button type="button" id="removerImagem" class="btn btn-danger btn-sm mt-2">Remover Imagem</button>
-            </div>
         </div>
 
         <!-- Formulário de Edição -->
         <div class="col-md-8">
-            <form method="post" asp-area="Site" asp-controller="Hq" asp-action="Editar" asp-route-id="@Model.Id">
+            <form id="formEdicao" method="post" asp-area="Site" asp-controller="Hq" asp-action="Editar" asp-route-id="@Model.Id" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
+
+                <!-- O ID precisa ser enviado corretamente -->
                 <input type="hidden" asp-for="Id" />
 
                 <label>Título:</label>
-                <input type="text" asp-for="Titulo" class="form-control" required />
+                <input type="text" asp-for="Titulo" class="form-control" required name="Titulo" />
 
                 <label>Autor:</label>
-                <input type="text" asp-for="Autor" class="form-control" required />
+                <input type="text" asp-for="Autor" class="form-control" required name="Autor" />
 
                 <label>Ano de Publicação:</label>
-                <input type="number" asp-for="AnoPublicacao" class="form-control" required />
+                <input type="number" asp-for="AnoPublicacao" class="form-control" required name="AnoPublicacao" />
 
                 <label>Editora:</label>
-                <input type="text" asp-for="Editora" class="form-control" required />
+                <input type="text" asp-for="Editora" class="form-control" required name="Editora" />
 
                 <label>Gênero:</label>
-                <input type="text" asp-for="Genero" class="form-control" required />
+                <input type="text" asp-for="Genero" class="form-control" required name="Genero" />
 
                 <label>Descrição:</label>
-                <textarea asp-for="DescricaoCompleta" class="form-control"></textarea>
+                <textarea asp-for="DescricaoCompleta" class="form-control" required name="DescricaoCompleta"></textarea>
 
-                <button type="submit" class="btn btn-success">Salvar Alterações</button>
+                <button type="submit" class="btn btn-success mt-3">Salvar Alterações</button>
             </form>
-
-
         </div>
     </div>
 </div>
+
+@section Styles {
+    <style>
+        /* Estiliza o card da HQ */
+        .hq-card {
+            width: 100%;
+            max-width: 350px; /* Aumentado */
+            min-height: 450px; /* Definido um tamanho melhor */
+            text-align: center;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            /* Efeito hover */
+            .hq-card:hover {
+                transform: scale(1.05);
+            }
+
+        /* Editora Bubble */
+        .hq-editora-bubble {
+            background-color: #333;
+            color: #fff;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        /* Imagem - Ajustado o tamanho */
+        .hq-image {
+            width: 100%;
+            height: 380px; /* Ajustado para melhor proporção */
+            border-radius: 10px;
+            object-fit: cover; /* Garante que a imagem não fique distorcida */
+        }
+
+        /* Botão de Remover */
+        .remove-button {
+            width: 100%;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+    </style>
+}
 
 @section Scripts {
     <script>
@@ -70,41 +127,17 @@
             const previewImagem = document.getElementById("previewImagem");
             const removerImagem = document.getElementById("removerImagem");
             const editoraBubble = document.getElementById("editoraBubble");
-            const editoraInput = document.getElementById("Editora"); // Corrigido conforme seu formulário original
+            const editoraInput = document.getElementById("Editora");
+            const hqPreviewContainer = document.getElementById("hqPreviewContainer");
+            const uploadContainer = document.getElementById("uploadContainer");
 
-            // Evento para enviar o formulário via AJAX corretamente
-            formEdicao.addEventListener("submit", function (event) {
-                event.preventDefault();
+            // Exibe a imagem corretamente ao carregar a página
+            if (previewImagem.src && previewImagem.src !== window.location.origin + "/") {
+                hqPreviewContainer.classList.remove("d-none");
+                uploadContainer.classList.add("d-none");
+            }
 
-                const formData = new FormData(formEdicao);
-
-                console.log("🔹 Dados sendo enviados para o servidor:");
-                formData.forEach((value, key) => {
-                    console.log(`${key}: ${value}`);
-                });
-
-                fetch(formEdicao.action, {
-                    method: "POST",
-                    body: formData,
-                    headers: {
-                        'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.sucesso) {
-                        console.log("✅ Alteração realizada com sucesso!");
-                        window.location.href = data.redirectUrl;
-                    } else {
-                        console.error("❌ Erros na edição:", data.erros);
-                    }
-                })
-                .catch(error => {
-                    console.error("🚨 Erro:", error);
-                });
-            });
-
-            // Pré-visualização da imagem ao selecionar
+            // Evento para pré-visualizar a imagem ao selecionar um novo arquivo
             imagemUpload.addEventListener("change", function (event) {
                 const file = event.target.files[0];
 
@@ -112,34 +145,67 @@
                     const reader = new FileReader();
                     reader.onload = function (e) {
                         previewImagem.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
 
-                        // Aplica a cor da editora
-                        const editoraNome = editoraInput.value.toLowerCase();
-                        if (editoraNome.includes("dc")) {
-                            editoraBubble.style.backgroundColor = "#0078D7";
-                            editoraBubble.innerText = "DC COMICS";
-                        } else if (editoraNome.includes("marvel")) {
-                            editoraBubble.style.backgroundColor = "#D72638";
-                            editoraBubble.innerText = "MARVEL COMICS";
-                        } else {
-                            editoraBubble.style.backgroundColor = "#333";
-                            editoraBubble.innerText = editoraInput.value || "EDITORA";
-                        }
-                        previewImagem.src = URL.createObjectURL(file);
-                        document.getElementById("hqPreviewContainer").classList.remove("d-none");
-                        document.getElementById("uploadContainer").classList.add("d-none");
-                    }
+                    hqPreviewContainer.classList.remove("d-none");
+                    uploadContainer.classList.add("d-none");
+                    removerImagem.classList.remove("d-none");
+                }
             });
 
             // Remover imagem
             removerImagem.addEventListener("click", function () {
-                previewImagem.src = "";
-                document.getElementById("hqPreviewContainer").classList.add("d-none");
-                document.getElementById("uploadContainer").classList.remove("d-none");
+                previewImagem.src = "/imagens/hqs/placeholder.jpg";
+                hqPreviewContainer.classList.add("d-none");
+                uploadContainer.classList.remove("d-none");
                 imagemUpload.value = "";
+                removerImagem.classList.add("d-none");
                 editoraBubble.innerText = "EDITORA";
             });
-        });
-    </script>
 
+            // Envio do formulário via AJAX (Corrigido para garantir que a imagem seja enviada)
+            formEdicao.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                const formData = new FormData(formEdicao);
+
+                // ✅ Garante que a imagem seja enviada corretamente
+                if (imagemUpload.files.length > 0) {
+                    formData.append("ImagemArquivo", imagemUpload.files[0]);
+                }
+
+                // 🔹 Debug: Verificar se a imagem foi anexada
+                console.log("🔹 Enviando os seguintes dados:");
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}:`, value);
+                }
+
+                fetch(formEdicao.action, {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.sucesso) {
+                        console.log("✅ Alteração realizada com sucesso!");
+                        window.location.href = data.redirectUrl;
+                    } else {
+                        console.error("❌ Erros na edição:", data.erro || data.erros);
+                        alert("Erro ao editar HQ: " + (data.erro || data.erros.join(", ")));
+                    }
+                })
+                .catch(error => {
+                    console.error("🚨 Erro ao enviar requisição:", error);
+                    alert("Erro ao enviar requisição. Verifique o console para mais detalhes.");
+                });
+            });
+        });
+
+    </script>
 }

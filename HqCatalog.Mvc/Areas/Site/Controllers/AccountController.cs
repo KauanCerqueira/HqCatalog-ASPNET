@@ -48,7 +48,7 @@ namespace HqCatalog.Mvc.Areas.Site.Controllers
             if (result.Succeeded)
             {
                 _logger.LogInformation("Usuário logado com sucesso.");
-                return RedirectToLocal(returnUrl);
+                return RedirectToAction("Index", "Home", new { area = "Site" });
             }
 
             ModelState.AddModelError(string.Empty, "Login inválido.");
